@@ -1,0 +1,7 @@
+﻿services:
+  minhaprimeiraapi:
+    image: minhaprimeiraapi
+    build:
+      context: .
+      dockerfile: MinhaPrimeiraApi/Dockerfile
+
