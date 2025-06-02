@@ -20,7 +20,7 @@ namespace MinhaPrimeiraApi.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Product>> Get()
         {
-            var products = _context.Products.ToList();
+            var products = _context.Products.AsNoTracking().ToList();
             
             if (products is null)
             {
@@ -45,14 +45,19 @@ namespace MinhaPrimeiraApi.Controllers
         [HttpPost]
         public ActionResult Post(Product product)
         {
-            if (product is null)
-            {
-                return BadRequest("Product invalid");
-            }
-            _context.Products.Add(product);
-            _context.SaveChanges();
+            try {
+                if (product is null)
+                {
+                    return BadRequest("Product invalid");
+                }
+                _context.Products.Add(product);
+                _context.SaveChanges();
 
-            return new CreatedAtRouteResult("GetProductById", new { id = product.ProductId}, product);
+                return new CreatedAtRouteResult("GetProductById", new { id = product.ProductId}, product);
+            } catch (Exception e) {
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "Ocorreu um erro ao tentar criar um produto");
+            }
         }
 
         [HttpPut("{id:int}")]
