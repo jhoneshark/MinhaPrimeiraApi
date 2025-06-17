@@ -1,6 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using Microsoft.OpenApi.MicrosoftExtensions;
+using MinhaPrimeiraApi.Validations;
 
 namespace MinhaPrimeiraApi.Models;
 
@@ -10,10 +12,11 @@ public class Product
     public int ProductId { get; set; }
     
     [Required]
-    [StringLength(80)]
+    [StringLength(80, MinimumLength = 2)]
+    [PrimeiraLetraMaiuscula]
     public string? Name { get; set; }
     
-    [Required]
+    [Required(ErrorMessage = "Informe uma descrição para o produto")]
     [StringLength(300)]
     public string? Description { get; set; }
     
@@ -33,4 +36,14 @@ public class Product
     
     [JsonIgnore]
     public Category? Category { get; set; }
+    
+    // Exemplo de data annotations
+    // [Range(18, 65)]
+    // [Range(18, 65, ErrorMessage = "A Idade deve estar em 18 e 65")]
+    // [RegularExpression(".+\\@.+\\..+", ErrorMessage = "Informe um email valido..")]
+    // [CreditCard(ErrorMessage = "Informe um credito valido..")]
+    // [Url]
+    // [Phone]
+    // exemplo
+    // [Compare"Senha"]
 }

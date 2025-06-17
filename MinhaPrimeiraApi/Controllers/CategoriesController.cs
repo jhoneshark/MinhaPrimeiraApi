@@ -35,7 +35,7 @@ namespace MinhaPrimeiraApi.Controllers
             }
         }
 
-        [HttpGet("{id:int}", Name = "GetCategoryById")]
+        [HttpGet("{id:int:min(1)}", Name = "GetCategoryById")]
         public ActionResult<Category> get(int id)
         {
             try {

@@ -18,16 +18,21 @@ namespace MinhaPrimeiraApi.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Product>> Get()
+        public async Task<ActionResult<IEnumerable<Product>>> Get()
         {
-            var products = _context.Products.AsNoTracking().ToList();
+
+            try {
+                var products =  await _context.Products.AsNoTracking().ToArrayAsync();
             
-            if (products is null)
-            {
-                return NotFound("Products not found.");
+                if (products is null)
+                {
+                    return NotFound("Products not found.");
+                }
+            
+                return Ok(products);
+            } catch (Exception e) {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro ao tentar buscar os produtos.");
             }
-            
-            return Ok(products);
         }
 
         [HttpGet("{id:int}", Name = "GetProductById")]
@@ -60,7 +65,7 @@ namespace MinhaPrimeiraApi.Controllers
             }
         }
 
-        [HttpPut("{id:int}")]
+        [HttpPut("{id:int:min(1)}")]
         public ActionResult Put(int id, Product product)
         {
             if (id != product.ProductId)
