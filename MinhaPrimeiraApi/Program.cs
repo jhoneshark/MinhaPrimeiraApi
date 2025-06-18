@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using MinhaPrimeiraApi.Context;
+using MinhaPrimeiraApi.Extensions;
 
 DotNetEnv.Env.Load();
 
@@ -28,6 +29,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.ConfigureExeptionHandler();
 }
 
 app.UseHttpsRedirection();

@@ -38,6 +38,8 @@ namespace MinhaPrimeiraApi.Controllers
         [HttpGet("{id:int:min(1)}", Name = "GetCategoryById")]
         public ActionResult<Category> get(int id)
         {
+            
+            // throw new Exception("Teste");   Criado para testar a middleare de exceptions
             try {
                 var category = _context.Categories.FirstOrDefault(c => c.CategoryId == id);
                 if (category is null)
