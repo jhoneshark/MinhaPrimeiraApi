@@ -11,10 +11,11 @@ namespace MinhaPrimeiraApi.Controllers
     public class CategoriesController : ControllerBase
     {
         private readonly AppDbContext _context;
-        
-        public CategoriesController(AppDbContext context)
+        private readonly ILogger _logger;
+        public CategoriesController(AppDbContext context, ILogger<CategoriesController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -40,6 +41,9 @@ namespace MinhaPrimeiraApi.Controllers
         {
             
             // throw new Exception("Teste");   Criado para testar a middleare de exceptions
+            
+            // Exemplo abaixo para log information
+            _logger.LogInformation($" ************** GET GetCategoryById = {id} **********************");
             try {
                 var category = _context.Categories.FirstOrDefault(c => c.CategoryId == id);
                 if (category is null)
