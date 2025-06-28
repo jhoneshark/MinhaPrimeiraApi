@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using MinhaPrimeiraApi.Context;
 using MinhaPrimeiraApi.Extensions;
+using MinhaPrimeiraApi.Logging;
 
 DotNetEnv.Env.Load();
 
@@ -21,6 +22,11 @@ builder.Services.AddSwaggerGen();
 string mySqlConnection = builder.Configuration.GetValue<string>("DEFAULT_CONNECTION");
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseMySql(mySqlConnection, ServerVersion.AutoDetect(mySqlConnection)));
+
+builder.Logging.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderConfiguration
+{
+    LogLevel = LogLevel.Information,
+}));
 
 var app = builder.Build();
 
