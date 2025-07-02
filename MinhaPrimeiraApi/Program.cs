@@ -4,6 +4,7 @@ using MinhaPrimeiraApi.Context;
 using MinhaPrimeiraApi.Extensions;
 using MinhaPrimeiraApi.Filters;
 using MinhaPrimeiraApi.Logging;
+using MinhaPrimeiraApi.Repository;
 
 DotNetEnv.Env.Load();
 
@@ -26,6 +27,9 @@ builder.Services.AddSwaggerGen();
 string mySqlConnection = builder.Configuration.GetValue<string>("DEFAULT_CONNECTION");
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseMySql(mySqlConnection, ServerVersion.AutoDetect(mySqlConnection)));
+
+// Está registrando a injeção de dependência, dizendo ao ASP.NET Core para usar CategoriesRepository sempre que alguém pedir por ICategoryRepository
+builder.Services.AddScoped<ICategoryRepository, CategoriesRepository>();
 
 builder.Logging.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderConfiguration
 {
