@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MinhaPrimeiraApi.Context;
 using MinhaPrimeiraApi.Models;
+using MinhaPrimeiraApi.Repository;
 
 namespace MinhaPrimeiraApi.Controllers
 {
@@ -10,59 +11,46 @@ namespace MinhaPrimeiraApi.Controllers
     [ApiController]
     public class ProductsController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IProductsRepository _productsRepository;
 
-        public ProductsController(AppDbContext context)
+        public ProductsController(IProductsRepository productsRepository)
         {
-            _context = context;
+            _productsRepository = productsRepository;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Product>>> Get()
+        public ActionResult<IEnumerable<Product>> Get()
         {
-
-            try {
-                var products =  await _context.Products.AsNoTracking().ToArrayAsync();
+            var products = _productsRepository.GetProducts().ToList();
             
-                if (products is null)
-                {
-                    return NotFound("Products not found.");
-                }
-            
-                return Ok(products);
-            } catch (Exception e) {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Ocorreu um erro ao tentar buscar os produtos.");
-            }
+            return Ok(products);
         }
 
         [HttpGet("{id:int}", Name = "GetProductById")]
         public ActionResult<Product> Get(int id)
         {
-            var produto = _context.Products.FirstOrDefault(p => p.CategoryId == id);
+            var produto = _productsRepository.GetProduct(id);
+            
             if (produto is null)
             {
                 return NotFound("Product not found.");
             }
             
-            return produto;
+            return Ok(produto);
         }
 
         [HttpPost]
         public ActionResult Post(Product product)
         {
-            try {
-                if (product is null)
-                {
-                    return BadRequest("Product invalid");
-                }
-                _context.Products.Add(product);
-                _context.SaveChanges();
-
-                return new CreatedAtRouteResult("GetProductById", new { id = product.ProductId}, product);
-            } catch (Exception e) {
-                return StatusCode(StatusCodes.Status500InternalServerError,
-                    "Ocorreu um erro ao tentar criar um produto");
+            if (product is null)
+            {
+                return BadRequest("Produto invalido.");
             }
+
+            var productCreated = _productsRepository.CreateProduct(product);
+            
+            return new CreatedAtRouteResult("GetProductById", new {id = productCreated.ProductId},  productCreated);
+
         }
 
         [HttpPut("{id:int:min(1)}")]
@@ -73,25 +61,22 @@ namespace MinhaPrimeiraApi.Controllers
                 return BadRequest("Product id invalid");
             }
 
-            _context.Entry(product).State = EntityState.Modified;
-            _context.SaveChanges();
-            
-            return Ok(product);
+            var productATT = _productsRepository.UpdateProduct(product);
+            return Ok(productATT);
         }
 
         [HttpDelete("{id:int}")]
         public ActionResult Delete(int id)
         {
-            var product = _context.Products.FirstOrDefault(p => p.ProductId == id);
+            var product = _productsRepository.GetProduct(id);
+            
             if (product is null)
             {
                 return NotFound("Product not found.");
             }
-            
-            _context.Products.Remove(product);
-            _context.SaveChanges();
-            
-            return Ok(product);
+
+            var productDeleted = _productsRepository.DeleteProduct(id);
+            return Ok(productDeleted);
         }
     }
 }

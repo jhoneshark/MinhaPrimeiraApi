@@ -30,6 +30,7 @@ builder.Services.AddDbContext<AppDbContext>(options => options.UseMySql(mySqlCon
 
 // Está registrando a injeção de dependência, dizendo ao ASP.NET Core para usar CategoriesRepository sempre que alguém pedir por ICategoryRepository
 builder.Services.AddScoped<ICategoryRepository, CategoriesRepository>();
+builder.Services.AddScoped<IProductsRepository, ProductsRepository>();
 
 builder.Logging.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderConfiguration
 {
