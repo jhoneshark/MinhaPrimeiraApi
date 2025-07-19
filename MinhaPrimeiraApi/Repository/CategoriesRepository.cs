@@ -15,7 +15,8 @@ public class CategoriesRepository : ICategoryRepository
 
     public IEnumerable<Category> GetCategories()
     {
-        return _context.Categories.ToList();
+        // AsNoTracking é usado apenas para somente leitura e melhora a performace, quando aplicado nao rastreia mais o obejro para pegar mudanças
+        return _context.Categories.AsNoTracking().ToList();
     }
 
     public Category GetCategory(int id)
