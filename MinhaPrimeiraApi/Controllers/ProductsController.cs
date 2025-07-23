@@ -21,6 +21,11 @@ namespace MinhaPrimeiraApi.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Product>> Get()
         {
+            // como o GetProducts é IQueryable posso fazer consultas como exemplo abaixo
+            // var products = _productsRepository.GetProducts().OrderBy(p => p.Name).ToList();
+            // var products = _productsRepository.GetProducts().Where(p => p.Price > 15).ToList();
+            // var products = _productsRepository.GetProducts().Select(p => p.Name).ToList();
+            
             var products = _productsRepository.GetProducts().ToList();
             
             return Ok(products);
