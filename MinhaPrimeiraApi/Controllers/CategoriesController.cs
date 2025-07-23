@@ -11,18 +11,18 @@ namespace MinhaPrimeiraApi.Controllers
     [ApiController]
     public class CategoriesController : ControllerBase
     {
-        private readonly ICategoryRepository _repository;
+        private readonly IUnitOfWork _uof;
         private readonly ILogger _logger;
-        public CategoriesController(ICategoryRepository repository, ILogger<CategoriesController> logger)
+        public CategoriesController(IUnitOfWork uof, ILogger<CategoriesController> logger)
         {
-            _repository = repository;
+            _uof = uof;
             _logger = logger;
         }
 
         [HttpGet]
         public ActionResult<IEnumerable<Category>> get()
         {
-            var categories = _repository.GetCategories();
+            var categories = _uof.CategoryRepository.GetCategories();
             return Ok(categories);
         }
 
@@ -33,7 +33,7 @@ namespace MinhaPrimeiraApi.Controllers
             
             _logger.LogInformation($" ************** GET GetCategoryById = {id} **********************");
             
-            var category = _repository.GetCategory(id);
+            var category = _uof.CategoryRepository.GetCategory(id);
 
             if (category is null)
             {
@@ -46,7 +46,7 @@ namespace MinhaPrimeiraApi.Controllers
         [HttpGet("produtos")]
         public ActionResult<IEnumerable<Category>> getCategoriesWithProducts()
         {
-            var categories = _repository.GetCategoriesWithProducts();
+            var categories = _uof.CategoryRepository.GetCategoriesWithProducts();
             return Ok(categories);
         }
 
@@ -58,7 +58,8 @@ namespace MinhaPrimeiraApi.Controllers
                 return BadRequest("Category invalid");
             }
 
-            var categoryCreate = _repository.CreateCategory(category);
+            var categoryCreate = _uof.CategoryRepository.CreateCategory(category);
+            _uof.Commit();
             
             return new CreatedAtRouteResult("GetCategoryById", new { id = categoryCreate.CategoryId }, categoryCreate);
         }
@@ -71,20 +72,23 @@ namespace MinhaPrimeiraApi.Controllers
                 return BadRequest("Dados invalidos");
             }
 
-            var categoryATT = _repository.UpdateCategory(category);
+            var categoryATT = _uof.CategoryRepository.UpdateCategory(category);
+            _uof.Commit();
+            
             return Ok(categoryATT);
         }
 
         [HttpDelete("{id:int}")]
         public ActionResult delete(int id)
         {
-            var category = _repository.GetCategory(id);
+            var category = _uof.CategoryRepository.GetCategory(id);
             if (category is null)
             {
                 return NotFound("Category not found.");
             }
 
-            var categoryDelete = _repository.DeleteCategory(id);
+            var categoryDelete = _uof.CategoryRepository.DeleteCategory(id);
+            _uof.Commit();
             
             return Ok(categoryDelete);
         }
