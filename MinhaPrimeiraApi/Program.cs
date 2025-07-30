@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using MinhaPrimeiraApi.Context;
+using MinhaPrimeiraApi.DTOs.Mappings;
 using MinhaPrimeiraApi.Extensions;
 using MinhaPrimeiraApi.Filters;
 using MinhaPrimeiraApi.Logging;
@@ -37,6 +38,8 @@ builder.Logging.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderCon
 {
     LogLevel = LogLevel.Information,
 }));
+
+builder.Services.AddAutoMapper(cfg => {}, typeof(ProductDTOMappingProfile).Assembly);
 
 var app = builder.Build();
 

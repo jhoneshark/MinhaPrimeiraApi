@@ -13,6 +13,11 @@ public class ProductsRepository : IProductsRepository
         _context = context;
     }
 
+    public IEnumerable<Product> GetProductByCategorie(int id)
+    {
+        return _context.Products.Where(p => p.CategoryId == id);
+    }
+
     public IQueryable<Product> GetProducts()
     {
         return _context.Products;

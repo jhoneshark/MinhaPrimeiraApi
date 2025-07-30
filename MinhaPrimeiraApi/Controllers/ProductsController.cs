@@ -1,7 +1,9 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MinhaPrimeiraApi.Context;
+using MinhaPrimeiraApi.DTOs;
 using MinhaPrimeiraApi.Models;
 using MinhaPrimeiraApi.Repository;
 
@@ -12,14 +14,31 @@ namespace MinhaPrimeiraApi.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly IProductsRepository _productsRepository;
+        private readonly IMapper _mapper;
 
-        public ProductsController(IProductsRepository productsRepository)
+        public ProductsController(IProductsRepository productsRepository, IMapper mapper)
         {
             _productsRepository = productsRepository;
+            _mapper = mapper;
+        }
+
+        [HttpGet("product-by-category/{id}")]
+        public ActionResult<IEnumerable<ProductDTO>> GetProductByCategorie(int id)
+        {
+            var product = _productsRepository.GetProductByCategorie(id);
+
+            if (product is null)
+                return NotFound();
+            
+            // var destino = _mapper.Map<Destino>(origem);
+            var productDTO = _mapper.Map<IEnumerable<ProductDTO>>(product);
+            
+            
+            return Ok(productDTO);
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Product>> Get()
+        public ActionResult<IEnumerable<ProductDTO>> Get()
         {
             // como o GetProducts é IQueryable posso fazer consultas como exemplo abaixo
             // var products = _productsRepository.GetProducts().OrderBy(p => p.Name).ToList();
@@ -28,11 +47,16 @@ namespace MinhaPrimeiraApi.Controllers
             
             var products = _productsRepository.GetProducts().ToList();
             
-            return Ok(products);
+            if (products is null)
+                return NotFound();
+            
+            var productDTO = _mapper.Map<IEnumerable<ProductDTO>>(products);
+            
+            return Ok(productDTO);
         }
 
         [HttpGet("{id:int}", Name = "GetProductById")]
-        public ActionResult<Product> Get(int id)
+        public ActionResult<ProductDTO> Get(int id)
         {
             var produto = _productsRepository.GetProduct(id);
             
@@ -40,38 +64,48 @@ namespace MinhaPrimeiraApi.Controllers
             {
                 return NotFound("Product not found.");
             }
+
+            var productDTO = _mapper.Map<ProductDTO>(produto);
             
-            return Ok(produto);
+            return Ok(productDTO);
         }
 
         [HttpPost]
-        public ActionResult Post(Product product)
+        public ActionResult<ProductDTO> Post(ProductDTO productDto)
         {
-            if (product is null)
+            if (productDto is null)
             {
                 return BadRequest("Produto invalido.");
             }
+            
+            var product = _mapper.Map<Product>(productDto);
 
             var productCreated = _productsRepository.CreateProduct(product);
             
-            return new CreatedAtRouteResult("GetProductById", new {id = productCreated.ProductId},  productCreated);
+            var newProductDTO = _mapper.Map<ProductDTO>(productCreated);
+            
+            return new CreatedAtRouteResult("GetProductById", new {id = productCreated.ProductId},  newProductDTO);
 
         }
 
         [HttpPut("{id:int:min(1)}")]
-        public ActionResult Put(int id, Product product)
+        public ActionResult<ProductDTO> Put(int id, ProductDTO productDto)
         {
-            if (id != product.ProductId)
+            if (id != productDto.ProductId)
             {
                 return BadRequest("Product id invalid");
             }
+            var product = _mapper.Map<Product>(productDto);
 
             var productATT = _productsRepository.UpdateProduct(product);
-            return Ok(productATT);
+            
+            var newProductDTO = _mapper.Map<ProductDTO>(productATT);
+            
+            return Ok(newProductDTO);
         }
 
         [HttpDelete("{id:int}")]
-        public ActionResult Delete(int id)
+        public ActionResult<ProductDTO> Delete(int id)
         {
             var product = _productsRepository.GetProduct(id);
             
@@ -81,7 +115,10 @@ namespace MinhaPrimeiraApi.Controllers
             }
 
             var productDeleted = _productsRepository.DeleteProduct(id);
-            return Ok(productDeleted);
+            
+            var productDTO = _mapper.Map<ProductDTO>(productDeleted);
+            
+            return Ok(productDTO);
         }
     }
 }
