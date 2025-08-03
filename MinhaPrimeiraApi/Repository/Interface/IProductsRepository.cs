@@ -1,10 +1,12 @@
 using MinhaPrimeiraApi.Models;
+using MinhaPrimeiraApi.Models.Pagination;
 
 namespace MinhaPrimeiraApi.Repository;
 
 public interface IProductsRepository
 {
     IQueryable<Product> GetProducts();
+    IEnumerable<Product> GetProductsPagination(ProductsParameters productsParameters );
     IEnumerable<Product> GetProductByCategorie(int id);
     Product GetProduct(int id);
     Product CreateProduct(Product product);

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MinhaPrimeiraApi.Context;
 using MinhaPrimeiraApi.Models;
+using MinhaPrimeiraApi.Models.Pagination;
 
 namespace MinhaPrimeiraApi.Repository;
 
@@ -11,6 +12,15 @@ public class ProductsRepository : IProductsRepository
     public ProductsRepository(AppDbContext context)
     {
         _context = context;
+    }
+
+    public IEnumerable<Product> GetProductsPagination(ProductsParameters productsParameters)
+    {
+        return GetProducts()
+            .OrderBy(p => p.Name)
+            .Skip((productsParameters.PageNumber - 1) * productsParameters.PageSize)
+            .Take(productsParameters.PageSize)
+            .ToList();
     }
 
     public IEnumerable<Product> GetProductByCategorie(int id)
