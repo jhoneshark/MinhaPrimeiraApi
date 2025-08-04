@@ -6,7 +6,11 @@ namespace MinhaPrimeiraApi.Repository;
 public interface IProductsRepository
 {
     IQueryable<Product> GetProducts();
-    IEnumerable<Product> GetProductsPagination(ProductsParameters productsParameters );
+    
+    // Paginaçao simples
+    // IEnumerable<Product> GetProductsPagination(ProductsParameters productsParameters );
+    // Pagianção completa
+    PagedList<Product> GetProductsPagination(ProductsParameters productsParameters );
     IEnumerable<Product> GetProductByCategorie(int id);
     Product GetProduct(int id);
     Product CreateProduct(Product product);

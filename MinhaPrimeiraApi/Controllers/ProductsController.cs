@@ -7,6 +7,7 @@ using MinhaPrimeiraApi.DTOs;
 using MinhaPrimeiraApi.Models;
 using MinhaPrimeiraApi.Models.Pagination;
 using MinhaPrimeiraApi.Repository;
+using Newtonsoft.Json;
 
 namespace MinhaPrimeiraApi.Controllers
 {
@@ -27,10 +28,22 @@ namespace MinhaPrimeiraApi.Controllers
         public ActionResult<IEnumerable<ProductDTO>> GetProductsPaged([FromQuery] ProductsParameters productsParametersarameters)
         {
             var products = _productsRepository.GetProductsPagination(productsParametersarameters);
-            
+
             // Temos duas formas de fazer essa a primeira 
             // var productsDto = _mapper.Map<IEnumerable<ProductDTO>>(products);
             // return Ok(productsDto);
+
+            var metaData = new
+            {
+                products.TotalCount,
+                products.PageSize,
+                products.CurrentPage,
+                products.TotalPages,
+                products.HasNextPage,
+                products.HasPreviousPage,
+            };
+            
+            Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metaData));
 
             // Essa a segunda forma
             return Ok(_mapper.Map<IEnumerable<ProductDTO>>(products));
