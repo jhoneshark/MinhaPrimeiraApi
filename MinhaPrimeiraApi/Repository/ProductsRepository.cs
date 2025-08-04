@@ -32,7 +32,7 @@ public class ProductsRepository : IProductsRepository
         return productsOrdered;
     }
 
-public IEnumerable<Product> GetProductByCategorie(int id)
+    public IEnumerable<Product> GetProductByCategorie(int id)
     {
         return _context.Products.Where(p => p.CategoryId == id);
     }
