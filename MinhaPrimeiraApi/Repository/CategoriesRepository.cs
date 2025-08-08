@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MinhaPrimeiraApi.Context;
 using MinhaPrimeiraApi.Models;
+using MinhaPrimeiraApi.Models.Pagination;
 
 namespace MinhaPrimeiraApi.Repository;
 
@@ -11,6 +12,13 @@ public class CategoriesRepository : ICategoryRepository
     public CategoriesRepository(AppDbContext context)
     {
         _context = context;
+    }
+
+    public PagedList<Category> GetCategoriesPagination(CategoriesParameters categoriesParameters)
+    {
+        var categoriesQuery = GetCategories().OrderBy(p => p.CategoryId).AsQueryable();
+        var categoriesOrdered = PagedList<Category>.ToPagedList(categoriesQuery, categoriesParameters.PageNumber, categoriesParameters.PageSize);
+        return categoriesOrdered;
     }
 
     public IEnumerable<Category> GetCategories()

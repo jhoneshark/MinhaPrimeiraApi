@@ -27,8 +27,8 @@ public class ProductsRepository : IProductsRepository
     // Paginação completa
     public PagedList<Product> GetProductsPagination(ProductsParameters productsParameters)
     {
-        var product = GetProducts().OrderBy(p => p.CategoryId).AsQueryable();
-        var productsOrdered = PagedList<Product>.ToPagedList(product, productsParameters.PageNumber, productsParameters.PageSize);
+        var productQuery = GetProducts().OrderBy(p => p.CategoryId).AsQueryable();
+        var productsOrdered = PagedList<Product>.ToPagedList(productQuery, productsParameters.PageNumber, productsParameters.PageSize);
         return productsOrdered;
     }
 

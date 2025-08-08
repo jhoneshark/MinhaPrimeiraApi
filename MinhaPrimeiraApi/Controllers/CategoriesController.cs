@@ -1,8 +1,11 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MinhaPrimeiraApi.Context;
+using MinhaPrimeiraApi.DTOs;
 using MinhaPrimeiraApi.Models;
+using MinhaPrimeiraApi.Models.Pagination;
 using MinhaPrimeiraApi.Repository;
 
 namespace MinhaPrimeiraApi.Controllers
@@ -13,10 +16,39 @@ namespace MinhaPrimeiraApi.Controllers
     {
         private readonly IUnitOfWork _uof;
         private readonly ILogger _logger;
-        public CategoriesController(IUnitOfWork uof, ILogger<CategoriesController> logger)
+        private readonly IMapper _mapper;
+
+        public CategoriesController(IUnitOfWork uof, ILogger<CategoriesController> logger, IMapper mapper)
         {
             _uof = uof;
             _logger = logger;
+            _mapper = mapper;
+        }
+
+        [HttpGet("categories-paged")]
+        public ActionResult<IEnumerable<CategoryDTO>> GetCategoriesPaged([FromQuery] CategoriesParameters  categoriesParametersarameters)
+        {
+            var categories = _uof.CategoryRepository.GetCategoriesPagination(categoriesParametersarameters);
+
+            var metaData = new
+            {
+                categories.TotalCount,
+                categories.PageSize,
+                categories.CurrentPage,
+                categories.TotalPages,
+                categories.HasNextPage,
+                categories.HasPreviousPage,
+            };
+            
+            var categoriesDto = _mapper.Map<IEnumerable<CategoryDTO>>(categories);
+
+            var response = new
+            {
+                categories = categoriesDto,
+                paginete = metaData
+            };
+            
+            return Ok(response);
         }
 
         [HttpGet]
