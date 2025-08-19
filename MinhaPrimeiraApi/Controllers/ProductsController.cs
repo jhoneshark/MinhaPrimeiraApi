@@ -49,6 +49,37 @@ namespace MinhaPrimeiraApi.Controllers
             return Ok(_mapper.Map<IEnumerable<ProductDTO>>(products));
         }
 
+        [HttpGet("filter/price/paged")]
+        public ActionResult<IEnumerable<ProductDTO>> GetProductsFilteredPrice([FromQuery] ProductsFilterPrice productsParametersarameters)
+        {
+            var products = _productsRepository.GetProductsFilterPrice(productsParametersarameters);
+
+            return ProductsFilteredPrice(products);
+        }
+
+        private ActionResult<IEnumerable<ProductDTO>> ProductsFilteredPrice(PagedList<Product> products)
+        {
+            var metaData = new
+            {
+                products.TotalCount,
+                products.PageSize,
+                products.CurrentPage,
+                products.TotalPages,
+                products.HasNextPage,
+                products.HasPreviousPage,
+            };
+            
+            var productDto = _mapper.Map<IEnumerable<ProductDTO>>(products);
+                
+            var response = new
+            {
+                products = productDto,
+                paginete = metaData
+            };
+            
+            return Ok(response);
+        }
+
         [HttpGet("product-by-category/{id}")]
         public ActionResult<IEnumerable<ProductDTO>> GetProductByCategorie(int id)
         {

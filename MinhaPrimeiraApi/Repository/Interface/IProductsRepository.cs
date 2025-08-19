@@ -10,7 +10,8 @@ public interface IProductsRepository
     // Paginaçao simples
     // IEnumerable<Product> GetProductsPagination(ProductsParameters productsParameters );
     // Pagianção completa
-    PagedList<Product> GetProductsPagination(ProductsParameters productsParameters );
+    PagedList<Product> GetProductsPagination(ProductsParameters productsParameters);
+    PagedList<Product> GetProductsFilterPrice(ProductsFilterPrice productsParameters);
     IEnumerable<Product> GetProductByCategorie(int id);
     Product GetProduct(int id);
     Product CreateProduct(Product product);
