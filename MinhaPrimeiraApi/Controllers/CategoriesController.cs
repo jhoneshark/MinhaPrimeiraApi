@@ -51,6 +51,37 @@ namespace MinhaPrimeiraApi.Controllers
             return Ok(response);
         }
 
+        [HttpGet("filter/name/paged")]
+        public ActionResult<IEnumerable<CategoryDTO>> GetCategoriesFilteredName([FromQuery] CategoriesFilterName categoriesParametersarameters)
+        {
+            var categories = _uof.CategoryRepository.GetCategoriesFilterName(categoriesParametersarameters);
+
+            return CategoriesFilteredName(categories);
+        }
+        
+        private ActionResult<IEnumerable<CategoryDTO>> CategoriesFilteredName(PagedList<Category> category)
+        {
+            var metaData = new
+            {
+                category.TotalCount,
+                category.PageSize,
+                category.CurrentPage,
+                category.TotalPages,
+                category.HasNextPage,
+                category.HasPreviousPage,
+            };
+            
+            var productDto = _mapper.Map<IEnumerable<CategoryDTO>>(category);
+                
+            var response = new
+            {
+                categories = productDto,
+                paginete = metaData
+            };
+            
+            return Ok(response);
+        }
+        
         [HttpGet]
         public ActionResult<IEnumerable<Category>> get()
         {

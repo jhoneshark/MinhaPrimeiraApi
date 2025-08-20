@@ -52,9 +52,9 @@ public class ProductsRepository : IProductsRepository
             }
         }
         
-        var productsFilered = PagedList<Product>.ToPagedList(productQuery, productsParameters.PageNumber, productsParameters.PageSize);
+        var productsFiltered = PagedList<Product>.ToPagedList(productQuery, productsParameters.PageNumber, productsParameters.PageSize);
         
-        return productsFilered;
+        return productsFiltered;
     }
 
     public IEnumerable<Product> GetProductByCategorie(int id)

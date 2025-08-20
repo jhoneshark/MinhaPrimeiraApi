@@ -21,6 +21,20 @@ public class CategoriesRepository : ICategoryRepository
         return categoriesOrdered;
     }
 
+    public PagedList<Category> GetCategoriesFilterName(CategoriesFilterName categoriesParameters)
+    {
+        var categories = GetCategories().OrderBy(p => p.Name).AsQueryable();
+
+        if (!string.IsNullOrEmpty(categoriesParameters.Name))
+        {
+            categories = categories.Where(p => p.Name.ToLower().Contains(categoriesParameters.Name.ToLower()));
+        }
+
+        var categoriesFiltered = PagedList<Category>.ToPagedList(categories, categoriesParameters.PageNumber, categoriesParameters.PageSize);
+        
+        return categoriesFiltered;
+    }
+
     public IEnumerable<Category> GetCategories()
     {
         // AsNoTracking é usado apenas para somente leitura e melhora a performace, quando aplicado nao rastreia mais o obejro para pegar mudanças

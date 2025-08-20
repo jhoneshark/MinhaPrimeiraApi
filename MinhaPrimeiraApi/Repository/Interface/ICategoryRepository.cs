@@ -6,6 +6,7 @@ namespace MinhaPrimeiraApi.Repository;
 public interface ICategoryRepository
 {
     PagedList<Category> GetCategoriesPagination(CategoriesParameters categoriesParameters);
+    PagedList<Category> GetCategoriesFilterName(CategoriesFilterName categoriesParameters);
     IEnumerable<Category> GetCategories();
     Category GetCategory(int id);
     Category CreateCategory(Category category);
