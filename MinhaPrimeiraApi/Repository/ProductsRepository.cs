@@ -25,14 +25,14 @@ public class ProductsRepository : IProductsRepository
     // }
 
     // Paginação completa
-    public PagedList<Product> GetProductsPagination(ProductsParameters productsParameters)
+    public async Task<PagedList<Product>> GetProductsPagination(ProductsParameters productsParameters)
     {
-        var productQuery = GetProducts().OrderBy(p => p.CategoryId).AsQueryable();
-        var productsOrdered = PagedList<Product>.ToPagedList(productQuery, productsParameters.PageNumber, productsParameters.PageSize);
+        var productQuery = _context.Products.OrderBy(p => p.CategoryId).AsQueryable();
+        var productsOrdered = await PagedList<Product>.ToPagedList(productQuery, productsParameters.PageNumber, productsParameters.PageSize);
         return productsOrdered;
     }
 
-    public PagedList<Product> GetProductsFilterPrice(ProductsFilterPrice productsParameters)
+    public async Task<PagedList<Product>> GetProductsFilterPrice(ProductsFilterPrice productsParameters)
     {
         var productQuery = GetProducts().OrderBy(p => p.Price).AsQueryable();
 
@@ -52,14 +52,14 @@ public class ProductsRepository : IProductsRepository
             }
         }
         
-        var productsFiltered = PagedList<Product>.ToPagedList(productQuery, productsParameters.PageNumber, productsParameters.PageSize);
+        var productsFiltered = await PagedList<Product>.ToPagedList(productQuery, productsParameters.PageNumber, productsParameters.PageSize);
         
         return productsFiltered;
     }
 
-    public IEnumerable<Product> GetProductByCategorie(int id)
+    public async Task<IEnumerable<Product>> GetProductByCategorie(int id)
     {
-        return _context.Products.Where(p => p.CategoryId == id);
+        return await _context.Products.Where(p => p.CategoryId == id).AsNoTracking().ToListAsync();
     }
 
     public IQueryable<Product> GetProducts()

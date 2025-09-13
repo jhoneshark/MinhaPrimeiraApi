@@ -5,9 +5,9 @@ namespace MinhaPrimeiraApi.Repository;
 
 public interface ICategoryRepository
 {
-    PagedList<Category> GetCategoriesPagination(CategoriesParameters categoriesParameters);
-    PagedList<Category> GetCategoriesFilterName(CategoriesFilterName categoriesParameters);
-    IEnumerable<Category> GetCategories();
+    Task<PagedList<Category>> GetCategoriesPagination(CategoriesParameters categoriesParameters);
+    Task<PagedList<Category>> GetCategoriesFilterName(CategoriesFilterName categoriesParameters);
+    Task<IEnumerable<Category>> GetCategories();
     Category GetCategory(int id);
     Category CreateCategory(Category category);
     Category UpdateCategory(Category category);

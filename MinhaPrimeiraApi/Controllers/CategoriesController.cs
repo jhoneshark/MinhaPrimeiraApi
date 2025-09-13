@@ -26,9 +26,9 @@ namespace MinhaPrimeiraApi.Controllers
         }
 
         [HttpGet("categories-paged")]
-        public ActionResult<IEnumerable<CategoryDTO>> GetCategoriesPaged([FromQuery] CategoriesParameters  categoriesParametersarameters)
+        public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategoriesPaged([FromQuery] CategoriesParameters  categoriesParametersarameters)
         {
-            var categories = _uof.CategoryRepository.GetCategoriesPagination(categoriesParametersarameters);
+            var categories = await _uof.CategoryRepository.GetCategoriesPagination(categoriesParametersarameters);
 
             var metaData = new
             {
@@ -52,9 +52,9 @@ namespace MinhaPrimeiraApi.Controllers
         }
 
         [HttpGet("filter/name/paged")]
-        public ActionResult<IEnumerable<CategoryDTO>> GetCategoriesFilteredName([FromQuery] CategoriesFilterName categoriesParametersarameters)
+        public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategoriesFilteredName([FromQuery] CategoriesFilterName categoriesParametersarameters)
         {
-            var categories = _uof.CategoryRepository.GetCategoriesFilterName(categoriesParametersarameters);
+            var categories = await _uof.CategoryRepository.GetCategoriesFilterName(categoriesParametersarameters);
 
             return CategoriesFilteredName(categories);
         }

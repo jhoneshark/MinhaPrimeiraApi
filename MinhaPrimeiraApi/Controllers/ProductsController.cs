@@ -25,9 +25,9 @@ namespace MinhaPrimeiraApi.Controllers
         }
 
         [HttpGet("products-paged")]
-        public ActionResult<IEnumerable<ProductDTO>> GetProductsPaged([FromQuery] ProductsParameters productsParametersarameters)
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductsPaged([FromQuery] ProductsParameters productsParametersarameters)
         {
-            var products = _productsRepository.GetProductsPagination(productsParametersarameters);
+            var products = await _productsRepository.GetProductsPagination(productsParametersarameters);
 
             // Temos duas formas de fazer essa a primeira 
             // var productsDto = _mapper.Map<IEnumerable<ProductDTO>>(products);
@@ -50,9 +50,9 @@ namespace MinhaPrimeiraApi.Controllers
         }
 
         [HttpGet("filter/price/paged")]
-        public ActionResult<IEnumerable<ProductDTO>> GetProductsFilteredPrice([FromQuery] ProductsFilterPrice productsParametersarameters)
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductsFilteredPrice([FromQuery] ProductsFilterPrice productsParametersarameters)
         {
-            var products = _productsRepository.GetProductsFilterPrice(productsParametersarameters);
+            var products = await _productsRepository.GetProductsFilterPrice(productsParametersarameters);
 
             return ProductsFilteredPrice(products);
         }

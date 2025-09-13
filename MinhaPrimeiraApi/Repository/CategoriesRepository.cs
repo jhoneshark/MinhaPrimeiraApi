@@ -14,31 +14,39 @@ public class CategoriesRepository : ICategoryRepository
         _context = context;
     }
 
-    public PagedList<Category> GetCategoriesPagination(CategoriesParameters categoriesParameters)
+    public async Task<PagedList<Category>> GetCategoriesPagination(CategoriesParameters categoriesParameters)
     {
-        var categoriesQuery = GetCategories().OrderBy(p => p.CategoryId).AsQueryable();
-        var categoriesOrdered = PagedList<Category>.ToPagedList(categoriesQuery, categoriesParameters.PageNumber, categoriesParameters.PageSize);
-        return categoriesOrdered;
+        var categoriesQuery = _context.Categories
+            .AsNoTracking()
+            .OrderBy(p => p.CategoryId)
+            .AsQueryable();
+        
+        var result = await PagedList<Category>.ToPagedList(categoriesQuery, categoriesParameters.PageNumber, categoriesParameters.PageSize);
+        
+        return result;
     }
 
-    public PagedList<Category> GetCategoriesFilterName(CategoriesFilterName categoriesParameters)
+    public async Task<PagedList<Category>> GetCategoriesFilterName(CategoriesFilterName categoriesParameters)
     {
-        var categories = GetCategories().OrderBy(p => p.Name).AsQueryable();
+        var categories = _context.Categories
+            .AsNoTracking()
+            .OrderBy(p => p.Name)
+            .AsQueryable();
 
         if (!string.IsNullOrEmpty(categoriesParameters.Name))
         {
             categories = categories.Where(p => p.Name.ToLower().Contains(categoriesParameters.Name.ToLower()));
         }
 
-        var categoriesFiltered = PagedList<Category>.ToPagedList(categories, categoriesParameters.PageNumber, categoriesParameters.PageSize);
+        var categoriesFiltered = await PagedList<Category>.ToPagedList(categories, categoriesParameters.PageNumber, categoriesParameters.PageSize);
         
         return categoriesFiltered;
     }
 
-    public IEnumerable<Category> GetCategories()
+    public async Task<IEnumerable<Category>> GetCategories()
     {
         // AsNoTracking é usado apenas para somente leitura e melhora a performace, quando aplicado nao rastreia mais o obejro para pegar mudanças
-        return _context.Categories.AsNoTracking().ToList();
+        return await _context.Categories.AsNoTracking().ToListAsync();
     }
 
     public Category GetCategory(int id)

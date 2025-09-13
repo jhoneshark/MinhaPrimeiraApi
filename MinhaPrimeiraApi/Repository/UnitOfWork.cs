@@ -30,7 +30,7 @@ public class UnitOfWork: IUnitOfWork
         }
     }
 
-    public void Commit()
+    public async Task Commit()
     {
         _context.SaveChanges();
     }
