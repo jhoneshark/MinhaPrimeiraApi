@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using MinhaPrimeiraApi.Context;
 using MinhaPrimeiraApi.Models;
 using MinhaPrimeiraApi.Models.Pagination;
+using X.PagedList;
+using X.PagedList.EF;
 
 namespace MinhaPrimeiraApi.Repository;
 
@@ -14,19 +16,19 @@ public class CategoriesRepository : ICategoryRepository
         _context = context;
     }
 
-    public async Task<PagedList<Category>> GetCategoriesPagination(CategoriesParameters categoriesParameters)
+    public async Task<IPagedList<Category>> GetCategoriesPagination(CategoriesParameters categoriesParameters)
     {
         var categoriesQuery = _context.Categories
             .AsNoTracking()
             .OrderBy(p => p.CategoryId)
             .AsQueryable();
         
-        var result = await PagedList<Category>.ToPagedList(categoriesQuery, categoriesParameters.PageNumber, categoriesParameters.PageSize);
+        var result = await categoriesQuery.ToPagedListAsync(categoriesParameters.PageNumber, categoriesParameters.PageSize);
         
         return result;
     }
 
-    public async Task<PagedList<Category>> GetCategoriesFilterName(CategoriesFilterName categoriesParameters)
+    public async Task<Models.Pagination.PagedList<Category>> GetCategoriesFilterName(CategoriesFilterName categoriesParameters)
     {
         var categories = _context.Categories
             .AsNoTracking()
@@ -38,7 +40,7 @@ public class CategoriesRepository : ICategoryRepository
             categories = categories.Where(p => p.Name.ToLower().Contains(categoriesParameters.Name.ToLower()));
         }
 
-        var categoriesFiltered = await PagedList<Category>.ToPagedList(categories, categoriesParameters.PageNumber, categoriesParameters.PageSize);
+        var categoriesFiltered = await Models.Pagination.PagedList<Category>.ToPagedList(categories, categoriesParameters.PageNumber, categoriesParameters.PageSize);
         
         return categoriesFiltered;
     }

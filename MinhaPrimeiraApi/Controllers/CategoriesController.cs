@@ -32,10 +32,10 @@ namespace MinhaPrimeiraApi.Controllers
 
             var metaData = new
             {
-                categories.TotalCount,
+                categories.Count,
                 categories.PageSize,
-                categories.CurrentPage,
-                categories.TotalPages,
+                categories.PageCount,
+                categories.TotalItemCount,
                 categories.HasNextPage,
                 categories.HasPreviousPage,
             };
