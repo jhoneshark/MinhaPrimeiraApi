@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -83,9 +84,9 @@ namespace MinhaPrimeiraApi.Controllers
         }
         
         [HttpGet]
-        public ActionResult<IEnumerable<Category>> get()
+        public async Task<ActionResult<IEnumerable<Category>>> get()
         {
-            var categories = _uof.CategoryRepository.GetCategories();
+            var categories = await _uof.CategoryRepository.GetCategories();
             return Ok(categories);
         }
 
