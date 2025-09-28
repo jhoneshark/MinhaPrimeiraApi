@@ -12,6 +12,7 @@ DotNetEnv.Env.Load();
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+// Remova o 'options => { options.Filters.Add(typeof(ApiExceptionFilter)); }' para funcionar o ApiExecptionMiddlewareExtensions
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add(typeof(ApiExceptionFilter));
