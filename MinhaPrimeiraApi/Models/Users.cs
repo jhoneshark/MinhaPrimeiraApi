@@ -30,6 +30,12 @@ public class Users
     [ForeignKey("RoleId")]
     public Roles Role { get; set; }
     
+    [Required]
+    public string RefreshToekn { get; set; }
+    
+    [Required]
+    public DateTime? RefreshTokenExpiryTime { get; set; }
+    
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;

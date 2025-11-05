@@ -1,5 +1,8 @@
+using System.Text;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using MinhaPrimeiraApi.Context;
 using MinhaPrimeiraApi.DTOs.Mappings;
 using MinhaPrimeiraApi.Extensions;
@@ -25,8 +28,28 @@ builder.Services.AddControllers(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+var secretKey = builder.Configuration["JWT:SecretKey"];
+
 builder.Services.AddAuthorization();
-builder.Services.AddAuthentication("Bearer").AddJwtBearer();
+builder.Services.AddAuthentication(options => {
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters()
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ClockSkew = TimeSpan.Zero,
+        ValidAudience = builder.Configuration["JWT:ValidAudience"],
+        ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
+    };
+});
 
 // string mySqlConnection = builder.Configuration.GetConnectionString("DefaultConnection");
 string mySqlConnection = builder.Configuration.GetValue<string>("DEFAULT_CONNECTION");
