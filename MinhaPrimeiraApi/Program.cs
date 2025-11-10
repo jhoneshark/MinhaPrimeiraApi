@@ -9,6 +9,7 @@ using MinhaPrimeiraApi.Extensions;
 using MinhaPrimeiraApi.Filters;
 using MinhaPrimeiraApi.Logging;
 using MinhaPrimeiraApi.Repository;
+using MinhaPrimeiraApi.Services;
 
 DotNetEnv.Env.Load();
 
@@ -60,6 +61,8 @@ builder.Services.AddDbContext<AppDbContext>(options => options.UseMySql(mySqlCon
 builder.Services.AddScoped<ICategoryRepository, CategoriesRepository>();
 builder.Services.AddScoped<IProductsRepository, ProductsRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+builder.Services.AddCatalogServices();
 
 builder.Logging.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderConfiguration
 {

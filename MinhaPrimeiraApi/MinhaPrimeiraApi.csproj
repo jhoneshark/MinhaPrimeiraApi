@@ -41,4 +41,8 @@
       <Folder Include="Controllers\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\MinhaPrimeiraApi.Services\MinhaPrimeiraApi.Services.csproj" />
+    </ItemGroup>
+
 </Project>
