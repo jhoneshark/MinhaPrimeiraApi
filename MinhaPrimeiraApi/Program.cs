@@ -3,13 +3,14 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using MinhaPrimeiraApi.Context;
-using MinhaPrimeiraApi.DTOs.Mappings;
+using MinhaPrimeiraApi.Infra.Context;
+using MinhaPrimeiraApi.Domain.DTOs.Mappings;
 using MinhaPrimeiraApi.Extensions;
 using MinhaPrimeiraApi.Filters;
 using MinhaPrimeiraApi.Logging;
-using MinhaPrimeiraApi.Repository;
+using MinhaPrimeiraApi.Domain.Repository;
 using MinhaPrimeiraApi.Services;
+using MinhaPrimeiraApi.Domain.Interface;
 
 DotNetEnv.Env.Load();
 

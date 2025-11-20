@@ -1,13 +1,9 @@
 using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MinhaPrimeiraApi.Context;
-using MinhaPrimeiraApi.DTOs;
-using MinhaPrimeiraApi.Models;
-using MinhaPrimeiraApi.Models.Pagination;
-using MinhaPrimeiraApi.Repository;
+using MinhaPrimeiraApi.Domain.DTOs;
+using MinhaPrimeiraApi.Domain.Models;
+using MinhaPrimeiraApi.Domain.Models.Pagination;
+using MinhaPrimeiraApi.Domain.Interface;
 
 namespace MinhaPrimeiraApi.Controllers
 {

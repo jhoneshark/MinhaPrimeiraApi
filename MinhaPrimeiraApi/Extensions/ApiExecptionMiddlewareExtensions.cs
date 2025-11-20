@@ -1,7 +1,6 @@
 using System.Net;
 using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.VisualStudio.TextTemplating;
-using MinhaPrimeiraApi.Models;
+using MinhaPrimeiraApi.Domain.Models;
 
 namespace MinhaPrimeiraApi.Extensions;
 

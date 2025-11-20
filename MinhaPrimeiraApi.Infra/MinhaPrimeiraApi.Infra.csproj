@@ -7,6 +7,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\MinhaPrimeiraApi.Commons\MinhaPrimeiraApi.Commons.csproj" />
+      <ProjectReference Include="..\MinhaPrimeiraApi.Domain\MinhaPrimeiraApi.Domain.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.11" />
+      <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0-preview.3.efcore.9.0.0" />
     </ItemGroup>
 </Project>
