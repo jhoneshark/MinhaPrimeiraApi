@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using MinhaPrimeiraApi.Domain.Interface;
 using MinhaPrimeiraApi.Domain.Repository;
+using MinhaPrimeiraApi.Services.Services;
 
 namespace MinhaPrimeiraApi.Services;
 
@@ -13,7 +14,10 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddCatalogServices(this IServiceCollection services, IConfiguration configuration)
     {
         AddApplicationServices(services);
-        AddAuthenticationServices(services, configuration); 
+        // OLD AddAuthenticationServices
+        // AddAuthenticationServices(services, configuration); 
+        // NEW AddAuthenticationServices
+        AddAuthenticationServices(services); 
         return services;
     }
 
@@ -24,29 +28,37 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUnitOfWork, UnitOfWork>();
     }
 
-    private static void AddAuthenticationServices(IServiceCollection services, IConfiguration configuration)
-    {
-        var secretKey = configuration["JWT:SecretKey"];
+    // OLD AddAuthenticationServices
+    // private static void AddAuthenticationServices(IServiceCollection services, IConfiguration configuration)
+    // {
+    //     var secretKey = configuration["JWT:SecretKey"];
+    //
+    //     services.AddAuthorization();
+    //     services.AddAuthentication(options => {
+    //         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    //         options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    //     }).AddJwtBearer(options =>
+    //     {
+    //         options.RequireHttpsMetadata = false;
+    //         options.SaveToken = true;
+    //         options.TokenValidationParameters = new TokenValidationParameters()
+    //         {
+    //             ValidateIssuer = true,
+    //             ValidateAudience = true,
+    //             ValidateLifetime = true,
+    //             ValidateIssuerSigningKey = true,
+    //             ClockSkew = TimeSpan.Zero,
+    //             ValidAudience = configuration["JWT:ValidAudience"],
+    //             ValidIssuer = configuration["JWT:ValidIssuer"],
+    //             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
+    //         };
+    //     });
+    // }
 
-        services.AddAuthorization();
-        services.AddAuthentication(options => {
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        }).AddJwtBearer(options =>
-        {
-            options.RequireHttpsMetadata = false;
-            options.SaveToken = true;
-            options.TokenValidationParameters = new TokenValidationParameters()
-            {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                ClockSkew = TimeSpan.Zero,
-                ValidAudience = configuration["JWT:ValidAudience"],
-                ValidIssuer = configuration["JWT:ValidIssuer"],
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
-            };
-        });
+    // NEW AddAuthenticationServices
+    private static void AddAuthenticationServices(IServiceCollection services)
+    {
+        services.AddScoped<ITokenService, TokenService>();
     }
+
 }
