@@ -8,7 +8,7 @@ using MinhaPrimeiraApi.Infra.Context;
 
 #nullable disable
 
-namespace MinhaPrimeiraApi.Migrations
+namespace MinhaPrimeiraApi.Infra.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     partial class AppDbContextModelSnapshot : ModelSnapshot
@@ -17,12 +17,12 @@ namespace MinhaPrimeiraApi.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.9")
+                .HasAnnotation("ProductVersion", "9.0.11")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
-            modelBuilder.Entity("MinhaPrimeiraApi.Models.Category", b =>
+            modelBuilder.Entity("MinhaPrimeiraApi.Domain.Models.Category", b =>
                 {
                     b.Property<int>("CategoryId")
                         .ValueGeneratedOnAdd()
@@ -45,7 +45,7 @@ namespace MinhaPrimeiraApi.Migrations
                     b.ToTable("Categories");
                 });
 
-            modelBuilder.Entity("MinhaPrimeiraApi.Models.Product", b =>
+            modelBuilder.Entity("MinhaPrimeiraApi.Domain.Models.Product", b =>
                 {
                     b.Property<int>("ProductId")
                         .ValueGeneratedOnAdd()
@@ -87,7 +87,7 @@ namespace MinhaPrimeiraApi.Migrations
                     b.ToTable("Products");
                 });
 
-            modelBuilder.Entity("MinhaPrimeiraApi.Models.Roles", b =>
+            modelBuilder.Entity("MinhaPrimeiraApi.Domain.Models.Roles", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -110,7 +110,7 @@ namespace MinhaPrimeiraApi.Migrations
                     b.ToTable("Roles");
                 });
 
-            modelBuilder.Entity("MinhaPrimeiraApi.Models.Users", b =>
+            modelBuilder.Entity("MinhaPrimeiraApi.Domain.Models.Users", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -143,11 +143,10 @@ namespace MinhaPrimeiraApi.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("varchar(20)");
 
-                    b.Property<string>("RefreshToekn")
-                        .IsRequired()
+                    b.Property<string>("RefreshToken")
                         .HasColumnType("longtext");
 
-                    b.Property<DateTime>("RefreshTokenExpiryTime")
+                    b.Property<DateTime?>("RefreshTokenExpiryTime")
                         .HasColumnType("datetime(6)");
 
                     b.Property<int>("RoleId")
@@ -163,9 +162,9 @@ namespace MinhaPrimeiraApi.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("MinhaPrimeiraApi.Models.Product", b =>
+            modelBuilder.Entity("MinhaPrimeiraApi.Domain.Models.Product", b =>
                 {
-                    b.HasOne("MinhaPrimeiraApi.Models.Category", "Category")
+                    b.HasOne("MinhaPrimeiraApi.Domain.Models.Category", "Category")
                         .WithMany("Products")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -174,9 +173,9 @@ namespace MinhaPrimeiraApi.Migrations
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("MinhaPrimeiraApi.Models.Users", b =>
+            modelBuilder.Entity("MinhaPrimeiraApi.Domain.Models.Users", b =>
                 {
-                    b.HasOne("MinhaPrimeiraApi.Models.Roles", "Role")
+                    b.HasOne("MinhaPrimeiraApi.Domain.Models.Roles", "Role")
                         .WithMany("Users")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -185,12 +184,12 @@ namespace MinhaPrimeiraApi.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("MinhaPrimeiraApi.Models.Category", b =>
+            modelBuilder.Entity("MinhaPrimeiraApi.Domain.Models.Category", b =>
                 {
                     b.Navigation("Products");
                 });
 
-            modelBuilder.Entity("MinhaPrimeiraApi.Models.Roles", b =>
+            modelBuilder.Entity("MinhaPrimeiraApi.Domain.Models.Roles", b =>
                 {
                     b.Navigation("Users");
                 });
