@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using MinhaPrimeiraApi.Domain.DTOs;
@@ -83,4 +84,53 @@ public class AuthController : ControllerBase
         });
     }
 
+    [HttpPost]
+    [Route("refreshToken")]
+    public async Task<IActionResult> RefreshToken(TokenModelDTO tokenModel)
+    {
+        if (tokenModel is null)
+        {
+            return BadRequest("Invalid client request");
+        }
+        
+        string? accessToken = tokenModel.AcessToken ?? throw new ArgumentNullException(nameof(tokenModel));
+        string? refreshToken = tokenModel.RefreshToken ?? throw new ArgumentNullException(nameof(tokenModel));
+        
+        var principal = _tokenService.GetPrincipalFromExpiredToken(accessToken!, _configuration);
+
+        if (principal == null)
+        {
+            return BadRequest("Invalid access token/refresh token");
+        }
+        
+        var email = principal.FindFirst(ClaimTypes.Email).Value;
+        
+        if (string.IsNullOrEmpty(email))
+        {
+            return BadRequest("Invalid token claims");
+        }
+        
+        var user = await _userRepository.GetUserByEmailAsync(email);
+        
+        if (user == null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+        {
+            return BadRequest("Invalid access token or refresh token");
+        }
+        
+        var newAccessToken = _tokenService.GenerateAccessToken(user);
+        var newRefreshToken = _tokenService.GenerateRefreshToken();
+        DateTime existingExpiryTime = user.RefreshTokenExpiryTime ?? DateTime.UtcNow;
+        
+        user.RefreshToken = newRefreshToken;
+        
+        await _userRepository.UpdateUserRefreshToken(user.Id, newRefreshToken, existingExpiryTime);
+
+        return Ok(new
+        {
+            Status = "Success",
+            Token = newAccessToken,
+            RefreshToken = newRefreshToken,
+            ExpiresAt = existingExpiryTime
+        });
+    }
 }

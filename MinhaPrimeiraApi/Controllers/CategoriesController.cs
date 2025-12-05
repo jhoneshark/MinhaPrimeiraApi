@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MinhaPrimeiraApi.Domain.DTOs;
 using MinhaPrimeiraApi.Domain.Models;
@@ -79,6 +80,7 @@ namespace MinhaPrimeiraApi.Controllers
             return Ok(response);
         }
         
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Category>>> get()
         {

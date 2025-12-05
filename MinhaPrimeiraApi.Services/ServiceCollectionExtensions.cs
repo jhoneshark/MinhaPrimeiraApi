@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.OpenApi.Models;
 using MinhaPrimeiraApi.Domain.Interface;
 using MinhaPrimeiraApi.Domain.Repository;
 using MinhaPrimeiraApi.Services.Services;
@@ -14,10 +15,9 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddCatalogServices(this IServiceCollection services, IConfiguration configuration)
     {
         AddApplicationServices(services);
-        // OLD AddAuthenticationServices
-        // AddAuthenticationServices(services, configuration); 
-        // NEW AddAuthenticationServices
-        AddAuthenticationServices(services); 
+        AddAuthenticationServices(services, configuration); 
+        AddAuthenticationServices(services);
+        AddSwaggerServices(services);
         return services;
     }
 
@@ -28,33 +28,32 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
     }
-
-    // OLD AddAuthenticationServices
-    // private static void AddAuthenticationServices(IServiceCollection services, IConfiguration configuration)
-    // {
-    //     var secretKey = configuration["JWT:SecretKey"];
-    //
-    //     services.AddAuthorization();
-    //     services.AddAuthentication(options => {
-    //         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    //         options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    //     }).AddJwtBearer(options =>
-    //     {
-    //         options.RequireHttpsMetadata = false;
-    //         options.SaveToken = true;
-    //         options.TokenValidationParameters = new TokenValidationParameters()
-    //         {
-    //             ValidateIssuer = true,
-    //             ValidateAudience = true,
-    //             ValidateLifetime = true,
-    //             ValidateIssuerSigningKey = true,
-    //             ClockSkew = TimeSpan.Zero,
-    //             ValidAudience = configuration["JWT:ValidAudience"],
-    //             ValidIssuer = configuration["JWT:ValidIssuer"],
-    //             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
-    //         };
-    //     });
-    // }
+    
+    private static void AddAuthenticationServices(IServiceCollection services, IConfiguration configuration)
+    {
+        var secretKey = configuration["JWT:SecretKey"];
+    
+        services.AddAuthorization();
+        services.AddAuthentication(options => {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        }).AddJwtBearer(options =>
+        {
+            options.RequireHttpsMetadata = false;
+            options.SaveToken = true;
+            options.TokenValidationParameters = new TokenValidationParameters()
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ClockSkew = TimeSpan.Zero,
+                ValidAudience = configuration["JWT:ValidAudience"],
+                ValidIssuer = configuration["JWT:ValidIssuer"],
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
+            };
+        });
+    }
 
     // NEW AddAuthenticationServices
     private static void AddAuthenticationServices(IServiceCollection services)
@@ -62,4 +61,36 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITokenService, TokenService>();
     }
 
+    private static void AddSwaggerServices(IServiceCollection services)
+    {
+        services.AddEndpointsApiExplorer();
+        services.AddSwaggerGen(swaggerOptions =>
+        {
+            swaggerOptions.CustomSchemaIds(type => type.FullName);
+            swaggerOptions.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Description = "Input token like: Bearer {your token}",
+                Name = "Authorization",
+                Scheme = "Bearer",
+                BearerFormat = "JWT",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.ApiKey
+            });
+
+            swaggerOptions.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer",
+                        }
+                    },
+                    new string[] { }
+                }
+            });
+        });
+    }
 }
