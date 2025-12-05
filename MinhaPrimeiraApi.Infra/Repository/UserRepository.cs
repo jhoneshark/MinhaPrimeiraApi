@@ -17,7 +17,7 @@ public class UserRepository : IUserRepository
 
     public async Task<Users?> GetUserByEmailAsync(string email)
     {
-        return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        return await _context.Users.Include(u => u.Role).FirstOrDefaultAsync(u => u.Email == email);
     }
 
     public async Task<Users> CreateUserAsync(Users user)
@@ -25,5 +25,20 @@ public class UserRepository : IUserRepository
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
         return user;
+    }
+
+    public async Task UpdateUserRefreshToken(int userId, string refreshToken, DateTime expiryTime)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+    
+        if (user != null)
+        {
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiryTime = expiryTime;
+            user.UpdatedAt = DateTime.UtcNow;
+            
+            _context.Users.Update(user); 
+            await _context.SaveChangesAsync();
+        }
     }
 }

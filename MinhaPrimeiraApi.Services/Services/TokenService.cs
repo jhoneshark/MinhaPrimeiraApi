@@ -5,12 +5,36 @@ using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using MinhaPrimeiraApi.Domain.Interface;
+using MinhaPrimeiraApi.Domain.Models;
 
 namespace MinhaPrimeiraApi.Services.Services;
 
-public class TokenService :  ITokenService
+public class TokenService : ITokenService
 {
-    public JwtSecurityToken GenerateAccessToken(IEnumerable<Claim> claims, IConfiguration config)
+    private readonly IConfiguration _configuration;
+
+    public TokenService(IConfiguration configuration)
+    {
+        _configuration = configuration;
+    }
+
+
+    public string GenerateAccessToken(Users user)
+    {
+        var authClaims = new List<Claim>
+        {
+            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new(ClaimTypes.Name, user.Name),
+            new(ClaimTypes.Email, user.Email),
+            new(ClaimTypes.Role, user.Role.Description),
+            
+        };
+        
+        var token = CreateJwtSecurityTokenObject(authClaims, _configuration);
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+public JwtSecurityToken CreateJwtSecurityTokenObject(IEnumerable<Claim> claims, IConfiguration config)
     {
         var key = config.GetSection("JWT").GetValue<string>("SecretKey") ?? throw new InvalidOperationException("Invalid secret key");
 
@@ -21,7 +45,7 @@ public class TokenService :  ITokenService
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddHours(config.GetSection("JWT").GetValue<double>("TokenValidityInMinutes")),
+            Expires = DateTime.UtcNow.AddMinutes(config.GetSection("JWT").GetValue<double>("TokenValidityInMinutes")),
             Audience = config.GetSection("JWT").GetValue<string>("ValidAudience"),
             Issuer = config.GetSection("JWT").GetValue<string>("ValidIssuer"),
             SigningCredentials = signingCredentials
