@@ -31,12 +31,12 @@ public class AuthController : ControllerBase
         {
             var accessToken = _tokenService.GenerateAccessToken(user);
             var refreshToken = _tokenService.GenerateRefreshToken();
-            
+
             var refreshTokenValidityInMinutes = _configuration.GetValue<int>("JWT:RefreshTokenValidityInMinutes");
             var refreshTokenExpiryTime = DateTime.UtcNow.AddMinutes(refreshTokenValidityInMinutes);
-            
+
             await _userRepository.UpdateUserRefreshToken(user.Id, refreshToken, refreshTokenExpiryTime);
-            
+
             return Ok(new
             {
                 Status = "Success",
@@ -46,7 +46,7 @@ public class AuthController : ControllerBase
             });
         }
 
-        return Unauthorized(new {Status = "Error", Message = "Invalid email or password"});
+        return Unauthorized(new { Status = "Error", Message = "Invalid email or password" });
     }
 
     [HttpPost]
@@ -55,14 +55,15 @@ public class AuthController : ControllerBase
     {
         string emailLower = model.Email.ToLower();
         string cpcOrCnpj = new string(model.CprOrCnpj.Where(char.IsDigit).ToArray());
-        
+
         var userExists = await _userRepository.GetUserByEmailAsync(emailLower);
 
         if (userExists != null)
         {
-            return StatusCode(StatusCodes.Status409Conflict, new { Status = "Error", Message = "User already exists with this email" });
+            return StatusCode(StatusCodes.Status409Conflict,
+                new { Status = "Error", Message = "User already exists with this email" });
         }
-        
+
         string passwordHash = BCrypt.Net.BCrypt.HashPassword(model.Password);
 
         var user = new Users()
@@ -75,9 +76,9 @@ public class AuthController : ControllerBase
             UpdatedAt = DateTime.Now,
             CreatedAt = DateTime.Now
         };
-        
+
         var result = await _userRepository.CreateUserAsync(user);
-        
+
         return StatusCode(StatusCodes.Status201Created, new
         {
             Status = "Success", Message = "User created successfully!", UserId = result.Id
@@ -92,37 +93,37 @@ public class AuthController : ControllerBase
         {
             return BadRequest("Invalid client request");
         }
-        
+
         string? accessToken = tokenModel.AcessToken ?? throw new ArgumentNullException(nameof(tokenModel));
         string? refreshToken = tokenModel.RefreshToken ?? throw new ArgumentNullException(nameof(tokenModel));
-        
+
         var principal = _tokenService.GetPrincipalFromExpiredToken(accessToken!, _configuration);
 
         if (principal == null)
         {
             return BadRequest("Invalid access token/refresh token");
         }
-        
+
         var email = principal.FindFirst(ClaimTypes.Email).Value;
-        
+
         if (string.IsNullOrEmpty(email))
         {
             return BadRequest("Invalid token claims");
         }
-        
+
         var user = await _userRepository.GetUserByEmailAsync(email);
-        
+
         if (user == null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
         {
             return BadRequest("Invalid access token or refresh token");
         }
-        
+
         var newAccessToken = _tokenService.GenerateAccessToken(user);
         var newRefreshToken = _tokenService.GenerateRefreshToken();
         DateTime existingExpiryTime = user.RefreshTokenExpiryTime ?? DateTime.UtcNow;
-        
+
         user.RefreshToken = newRefreshToken;
-        
+
         await _userRepository.UpdateUserRefreshToken(user.Id, newRefreshToken, existingExpiryTime);
 
         return Ok(new
@@ -133,4 +134,19 @@ public class AuthController : ControllerBase
             ExpiresAt = existingExpiryTime
         });
     }
+
+    [HttpPost]
+    [Route("revokeToken")]
+    public async Task<IActionResult> RevokeToken(string email)
+    {
+        var user = await _userRepository.GetUserByEmailAsync(email);
+        
+        if (user is null) return BadRequest("Invalid user email");
+
+        user.RefreshToken = null;
+        await _userRepository.UpdateUserRefreshToken(user.Id, null, DateTime.UtcNow);
+       
+        return NoContent();
+    }
+
 }

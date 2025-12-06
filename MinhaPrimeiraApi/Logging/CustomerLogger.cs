@@ -14,7 +14,11 @@ public class CustomerLogger : ILogger
 
     public bool IsEnabled(LogLevel logLevel)
     {
+        // Dessa forma só retorna o LogLevel definido na class program
         return logLevel == loggerConfig.LogLevel;
+        // Desta outra forma retorna qualquer LogLevel acima do informado
+        // Resultado: Grava Information, Warning, Error e Critical.
+        // return logLevel >= loggerConfig.LogLevel;
     }
 
     public IDisposable? BeginScope<TState>(TState state)
