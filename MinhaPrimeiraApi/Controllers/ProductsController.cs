@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MinhaPrimeiraApi.Domain.DTOs;
 using MinhaPrimeiraApi.Domain.Models;
@@ -126,6 +127,7 @@ namespace MinhaPrimeiraApi.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "RootOnly")]
         public ActionResult<ProductDTO> Post(ProductDTO productDto)
         {
             if (productDto is null)
@@ -160,6 +162,7 @@ namespace MinhaPrimeiraApi.Controllers
         }
 
         [HttpDelete("{id:int}")]
+        [Authorize(Policy = "ExclusivePolicyOnly")]
         public ActionResult<ProductDTO> Delete(int id)
         {
             var product = _productsRepository.GetProduct(id);

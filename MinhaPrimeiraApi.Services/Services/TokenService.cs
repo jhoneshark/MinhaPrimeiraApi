@@ -27,6 +27,8 @@ public class TokenService : ITokenService
             new(ClaimTypes.Name, user.Name),
             new(ClaimTypes.Email, user.Email),
             new(ClaimTypes.Role, user.Role.Description),
+            //Abaixo vou adicionar uma claim customizada e vou usar no service ServiceCollectionExtensions na função AddPolicysAuthorization
+            new("Id",  user.Id.ToString()),
             
         };
         

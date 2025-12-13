@@ -113,6 +113,7 @@ namespace MinhaPrimeiraApi.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "RootOnly")]
         public ActionResult post(Category category)
         {
             if (category is null)
@@ -141,6 +142,7 @@ namespace MinhaPrimeiraApi.Controllers
         }
 
         [HttpDelete("{id:int}")]
+        [Authorize(Policy = "ExclusivePolicyOnly")]
         public ActionResult delete(int id)
         {
             var category = _uof.CategoryRepository.GetCategory(id);

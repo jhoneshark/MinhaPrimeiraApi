@@ -18,6 +18,7 @@ public static class ServiceCollectionExtensions
         AddAuthenticationServices(services, configuration); 
         AddAuthenticationServices(services);
         AddSwaggerServices(services);
+        AddPolicysAuthorization(services);
         return services;
     }
 
@@ -27,6 +28,32 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IProductsRepository, ProductsRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+    }
+
+    private static void AddPolicysAuthorization(IServiceCollection services)
+    {
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+            options.AddPolicy("RootOnly", policy => policy.RequireRole("Root"));
+            //exemplo com duas condicoes 
+            //options.AddPolicy("RootOnly", policy => policy.RequireRole("Root").RequireClaim("Id", "3"));
+            options.AddPolicy("UserOnly", policy => policy.RequireRole("User"));
+
+            options.AddPolicy("ExclusivePolicyOnly", policy =>
+                policy.RequireAssertion(context =>
+                    context.User.IsInRole("Admin") || 
+                    context.User.IsInRole("Root")
+                    
+                    // mais exemplo abaixo
+                    // context.User.HasClaim(claim => 
+                    //     claim.Type == "Id" ||
+                    //     context.User.IsInRole("Admin") || 
+                    //     context.User.IsInRole("Root") || 
+                    //     context.User.IsInRole("User"))
+                    ));
+
+        });
     }
     
     private static void AddAuthenticationServices(IServiceCollection services, IConfiguration configuration)

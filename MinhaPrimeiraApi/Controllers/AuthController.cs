@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using MinhaPrimeiraApi.Domain.DTOs;
@@ -137,6 +138,7 @@ public class AuthController : ControllerBase
 
     [HttpPost]
     [Route("revokeToken")]
+    [Authorize(Policy = "ExclusivePolicyOnly")]
     public async Task<IActionResult> RevokeToken(string email)
     {
         var user = await _userRepository.GetUserByEmailAsync(email);
