@@ -18,6 +18,7 @@ public static class ServiceCollectionExtensions
         AddAuthenticationServices(services, configuration); 
         AddAuthenticationServices(services);
         AddSwaggerServices(services);
+        //AddPolicyCors(services);
         AddPolicysAuthorization(services);
         return services;
     }
@@ -28,6 +29,36 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IProductsRepository, ProductsRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+    }
+
+    private static void AddPolicyCors(IServiceCollection services)
+    {
+        services.AddCors(options => 
+        {
+            options.AddDefaultPolicy(builder => 
+            {
+                builder.AllowAnyOrigin()   // Permite qualquer IP/Domínio
+                    .AllowAnyMethod()   // Permite GET, POST, PUT, DELETE, OPTIONS
+                    .AllowAnyHeader();  // Permite Authorization, X-Requested-With, etc
+                
+                    // .WithOrigins(
+                    //     "https://api.parceiro-a.com",
+                    //     "https://loja.parceiro-b.com.br"
+                    // )
+                    // Apenas Leitura (Segurança alta):
+                    //.WithMethods("GET", "OPTIONS")
+                    //// OPTIONS é necessário para o 'preflight' do navegador em alguns casos
+                    /// .WithMethods("GET", "POST", "PUT")
+                    /// // Restringe até os headers aceitos
+                    /// .WithHeaders("Content-Type", "X-Api-Key");
+                    /// .WithHeaders(
+                    // "Authorization",      // Padrão: Token JWT (Bearer ...)
+                    // "Content-Type",       // Padrão: Avisa que é JSON
+                    // "X-Api-Version",      // Customizado: Avisa que quer usar a v2 da API
+                    // "X-Idempotency-Key"   // Customizado: UUID para evitar duplicidade
+                    //     );
+            });
+        });
     }
 
     private static void AddPolicysAuthorization(IServiceCollection services)
