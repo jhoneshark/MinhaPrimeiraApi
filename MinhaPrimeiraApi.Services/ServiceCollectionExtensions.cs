@@ -18,7 +18,7 @@ public static class ServiceCollectionExtensions
         AddAuthenticationServices(services, configuration); 
         AddAuthenticationServices(services);
         AddSwaggerServices(services);
-        //AddPolicyCors(services);
+        AddPolicyCors(services);
         AddPolicysAuthorization(services);
         return services;
     }
@@ -35,28 +35,37 @@ public static class ServiceCollectionExtensions
     {
         services.AddCors(options => 
         {
+            // ---------------------------------------------------------
+            // 1. POLÍTICA PADRÃO (Default)
+            // ---------------------------------------------------------
+            // Esta será usada se nenhuma outra for especificada no Controller.
             options.AddDefaultPolicy(builder => 
             {
                 builder.AllowAnyOrigin()   // Permite qualquer IP/Domínio
                     .AllowAnyMethod()   // Permite GET, POST, PUT, DELETE, OPTIONS
                     .AllowAnyHeader();  // Permite Authorization, X-Requested-With, etc
-                
-                    // .WithOrigins(
-                    //     "https://api.parceiro-a.com",
-                    //     "https://loja.parceiro-b.com.br"
-                    // )
-                    // Apenas Leitura (Segurança alta):
-                    //.WithMethods("GET", "OPTIONS")
-                    //// OPTIONS é necessário para o 'preflight' do navegador em alguns casos
-                    /// .WithMethods("GET", "POST", "PUT")
-                    /// // Restringe até os headers aceitos
-                    /// .WithHeaders("Content-Type", "X-Api-Key");
-                    /// .WithHeaders(
-                    // "Authorization",      // Padrão: Token JWT (Bearer ...)
-                    // "Content-Type",       // Padrão: Avisa que é JSON
-                    // "X-Api-Version",      // Customizado: Avisa que quer usar a v2 da API
-                    // "X-Idempotency-Key"   // Customizado: UUID para evitar duplicidade
-                    //     );
+            });
+
+            // ---------------------------------------------------------
+            // 2. POLÍTICA NOMEADA: "ParceiroVip"
+            // ---------------------------------------------------------
+            // Cenário: Um parceiro que precisa acessar endpoints restritos.
+            options.AddPolicy("ParceiroVip", builder => 
+            {
+                builder.WithOrigins("https://api.parceiro-vip.com")
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            });
+
+            // ---------------------------------------------------------
+            // 3. POLÍTICA NOMEADA: "ApenasLeituraPublica"
+            // ---------------------------------------------------------
+            // Cenário: Dados públicos (notícias, clima) que qualquer site pode consumir.
+            options.AddPolicy("ApenasLeituraPublica", builder => 
+            {
+                builder.AllowAnyOrigin() // CUIDADO: Totalmente aberto
+                    .WithMethods("GET", "OPTIONS") // Só permite ler
+                    .AllowAnyHeader();
             });
         });
     }

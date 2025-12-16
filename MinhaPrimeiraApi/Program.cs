@@ -41,7 +41,7 @@ builder.Services.AddAutoMapper(cfg => {}, typeof(ProductDTOMappingProfile).Assem
 
 var app = builder.Build();
 
-//app.UseCors();
+app.UseCors();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

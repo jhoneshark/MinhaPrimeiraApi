@@ -1,5 +1,6 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using MinhaPrimeiraApi.Domain.DTOs;
 using MinhaPrimeiraApi.Domain.Models;
@@ -49,6 +50,10 @@ namespace MinhaPrimeiraApi.Controllers
             return Ok(response);
         }
 
+        // 2. Usa a política "ParceiroVip"
+        // Apenas "https://api.parceiro-vip.com" acessa aqui
+        // O Default é IGNORADO para este método.
+        // [EnableCors("ParceiroVip")] ou [EnableCors("ApenasLeituraPublica")]
         [HttpGet("filter/name/paged")]
         public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategoriesFilteredName([FromQuery] CategoriesFilterName categoriesParametersarameters)
         {
