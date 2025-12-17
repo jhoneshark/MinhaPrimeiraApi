@@ -3,6 +3,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.OpenApi.Models;
 using MinhaPrimeiraApi.Domain.Interface;
 using MinhaPrimeiraApi.Domain.Repository;
@@ -15,9 +19,10 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddCatalogServices(this IServiceCollection services, IConfiguration configuration)
     {
         AddApplicationServices(services);
-        AddAuthenticationServices(services, configuration); 
+        AddAuthenticationServices(services, configuration);
         AddAuthenticationServices(services);
         AddSwaggerServices(services);
+        AddRateLimiter(services);
         AddPolicyCors(services);
         AddPolicysAuthorization(services);
         return services;
@@ -29,6 +34,75 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IProductsRepository, ProductsRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+    }
+    
+    private static void AddRateLimiter(IServiceCollection services)
+    {
+        services.AddRateLimiter(options =>
+        {
+            // Configuração geral de rejeição
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+            // 1. Política para área pública (Global, sem particionamento por IP neste exemplo simples)
+            options.AddFixedWindowLimiter("Publico", opt =>
+            {
+                opt.PermitLimit = 1000;
+                opt.Window = TimeSpan.FromMinutes(1);
+                opt.QueueLimit = 0;
+            });
+
+            // 2. Política "API_Free" (Particionada por IP)
+            options.AddPolicy("API_Free", httpContext =>
+            {
+                var userIdentifier = httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value 
+                                     ?? httpContext.Connection.RemoteIpAddress?.ToString() 
+                                     ?? "anonymous";
+            
+                return RateLimitPartition.GetFixedWindowLimiter(userIdentifier, _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = 3,
+                    Window = TimeSpan.FromSeconds(30),
+                    QueueLimit = 0
+                });
+            });
+
+            // 3. Política "API_Premium" (Particionada por IP)
+            options.AddPolicy("API_Premium", httpContext =>
+            {
+                var userIdentifier = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
+                return RateLimitPartition.GetFixedWindowLimiter(userIdentifier, _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = 100,         // 100 requisições (muito mais limite)
+                    Window = TimeSpan.FromSeconds(10),
+                    QueueLimit = 2
+                });
+            });
+        });
+    }
+
+    private static void AddRateLimiterGlobal(IServiceCollection services)
+    {
+        services.AddRateLimiter(rateLimitOptions =>
+        {
+            rateLimitOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+            rateLimitOptions.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext => 
+            {
+                // Tenta pegar o IP, se for nulo (localhost/teste), usa "unknown"
+                var remoteIp = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
+                return RateLimitPartition.GetFixedWindowLimiter(
+                    partitionKey: remoteIp, // MUDANÇA: Particiona por IP, não por Host
+                    factory: partition => new FixedWindowRateLimiterOptions
+                    {
+                        AutoReplenishment = true,
+                        PermitLimit = 10, // MUDANÇA: Aumentado para 10 reqs
+                        QueueLimit = 2,   // MUDANÇA: Permite enfileirar 2 reqs breves
+                        Window = TimeSpan.FromSeconds(5)
+                    });
+            });
+        });
     }
 
     private static void AddPolicyCors(IServiceCollection services)

@@ -36,7 +36,7 @@ public class TokenService : ITokenService
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-public JwtSecurityToken CreateJwtSecurityTokenObject(IEnumerable<Claim> claims, IConfiguration config)
+    public JwtSecurityToken CreateJwtSecurityTokenObject(IEnumerable<Claim> claims, IConfiguration config)
     {
         var key = config.GetSection("JWT").GetValue<string>("SecretKey") ?? throw new InvalidOperationException("Invalid secret key");
 

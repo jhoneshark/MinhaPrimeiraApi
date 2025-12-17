@@ -2,6 +2,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using MinhaPrimeiraApi.Domain.DTOs;
 using MinhaPrimeiraApi.Domain.Models;
 using MinhaPrimeiraApi.Domain.Models.Pagination;
@@ -85,8 +86,10 @@ namespace MinhaPrimeiraApi.Controllers
             return Ok(response);
         }
         
+        //essa policy tem uma regra de 3 request a cada 30s
         [Authorize]
         [HttpGet]
+        [EnableRateLimiting("API_Free")]
         public async Task<ActionResult<IEnumerable<Category>>> get()
         {
             var categories = await _uof.CategoryRepository.GetCategories();
