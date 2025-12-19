@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Threading.RateLimiting;
+using Asp.Versioning;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.RateLimiting;
@@ -25,6 +26,7 @@ public static class ServiceCollectionExtensions
         AddRateLimiter(services);
         AddPolicyCors(services);
         AddPolicysAuthorization(services);
+        AddApiVersioningServices(services);
         return services;
     }
 
@@ -34,6 +36,31 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IProductsRepository, ProductsRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+    }
+    
+    private static void AddApiVersioningServices(IServiceCollection services)
+    {
+        // o AddApiExplorer é para o swagger
+        // se nao explicitar com o ApiVersionReader um esquema de versionamento o padrao é url query string
+        // exemplos
+        // url http://localhost:5041/api/v1/version1
+        // queryString http://localhost:5041/api/version2?api-version=2.0
+        
+        services.AddApiVersioning(options =>
+        {
+            options.DefaultApiVersion = new ApiVersion(1, 0);
+            options.AssumeDefaultVersionWhenUnspecified = true;
+            options.ReportApiVersions = true;
+            options.ApiVersionReader = ApiVersionReader.Combine(
+                new UrlSegmentApiVersionReader(),
+                new QueryStringApiVersionReader("api-version")
+            );
+        }).AddApiExplorer(opt =>
+        {
+            opt.GroupNameFormat = "'v'V";
+            opt.SubstituteApiVersionInUrl = true;
+        });
+
     }
     
     private static void AddRateLimiter(IServiceCollection services)
