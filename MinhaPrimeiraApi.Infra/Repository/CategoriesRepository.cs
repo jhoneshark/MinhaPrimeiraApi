@@ -54,6 +54,12 @@ public class CategoriesRepository : ICategoryRepository
 
     public Category GetCategory(int id)
     {
+        // Adicionar um delay de 3 segundos para teste
+        // Ele é sincrono e bloqueia a thread
+        // System.Threading.Thread.Sleep(3000);
+        // ou 
+        // await Task.Delay(3000);
+        // Quando usar Thread.Sleep? Testes rápidos Debug local (nunca em produção web)
         return _context.Categories.FirstOrDefault(c => c.CategoryId == id);
     }
 

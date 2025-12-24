@@ -39,6 +39,8 @@ builder.Logging.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderCon
 
 builder.Services.AddAutoMapper(cfg => {}, typeof(ProductDTOMappingProfile).Assembly);
 
+builder.Services.AddMemoryCache();
+
 var app = builder.Build();
 
 app.UseCors();

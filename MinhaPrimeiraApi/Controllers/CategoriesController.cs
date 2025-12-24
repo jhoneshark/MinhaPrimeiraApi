@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Caching.Memory;
 using MinhaPrimeiraApi.Domain.DTOs;
 using MinhaPrimeiraApi.Domain.Models;
 using MinhaPrimeiraApi.Domain.Models.Pagination;
@@ -17,12 +18,15 @@ namespace MinhaPrimeiraApi.Controllers
         private readonly IUnitOfWork _uof;
         private readonly ILogger _logger;
         private readonly IMapper _mapper;
+        private readonly IMemoryCache _cache;
+        private const string CacheCategoryAll = "categories_all";
 
-        public CategoriesController(IUnitOfWork uof, ILogger<CategoriesController> logger, IMapper mapper)
+        public CategoriesController(IUnitOfWork uof, ILogger<CategoriesController> logger, IMapper mapper, IMemoryCache cache)
         {
             _uof = uof;
             _logger = logger;
             _mapper = mapper;
+            _cache = cache;
         }
 
         [HttpGet("categories-paged")]
@@ -87,28 +91,52 @@ namespace MinhaPrimeiraApi.Controllers
         }
         
         //essa policy tem uma regra de 3 request a cada 30s
-        [Authorize]
+        //[Authorize]
         [HttpGet]
-        [EnableRateLimiting("API_Free")]
-        public async Task<ActionResult<IEnumerable<Category>>> get()
+        //[EnableRateLimiting("API_Free")]
+        public async Task<ActionResult<IEnumerable<Category>>> Get()
         {
-            var categories = await _uof.CategoryRepository.GetCategories();
+            var categories = await _cache.GetOrCreateAsync(
+                CacheCategoryAll,
+                async entry =>
+                {
+                    //AbsoluteExpiration é Horário fixo
+                    //Tempo fixo desde criação
+                    entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10);
+                    //Tempo sem acesso
+                    entry.SlidingExpiration = TimeSpan.FromMinutes(5);
+                    entry.Priority = CacheItemPriority.High;
+                    return await _uof.CategoryRepository.GetCategories();
+                });
+
             return Ok(categories);
         }
 
         [HttpGet("{id:int:min(1)}", Name = "GetCategoryById")]
-        public ActionResult<Category> get(int id)
+        public async Task<ActionResult<Category>> get(int id)
         {
+            var CacheCategoryId = GetCategoryCacheKey(id);
+            // exemplo para criar chave para um unico user, apenas exemplo
+            //var userId = User.Identity.Name;
             // throw new Exception("Teste");   Criado para testar a middleare de exceptions
             
             _logger.LogInformation($" ************** GET GetCategoryById = {id} **********************");
-            
-            var category = _uof.CategoryRepository.GetCategory(id);
 
-            if (category is null)
-            {
+            var category = await _cache.GetOrCreateAsync(
+                CacheCategoryId,
+                async entry =>
+                {
+                    //AbsoluteExpiration é Horário fixo
+                    //Tempo fixo desde criação
+                    entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10);
+                    //Tempo sem acesso
+                    entry.SlidingExpiration = TimeSpan.FromMinutes(5);
+
+                    return Task.FromResult(_uof.CategoryRepository.GetCategory(id));
+                });
+            
+            if (category == null)
                 return NotFound();
-            }
             
             return Ok(category);    
         }
@@ -132,6 +160,8 @@ namespace MinhaPrimeiraApi.Controllers
             var categoryCreate = _uof.CategoryRepository.CreateCategory(category);
             _uof.Commit();
             
+            _cache.Remove(CacheCategoryAll);
+            
             return new CreatedAtRouteResult("GetCategoryById", new { id = categoryCreate.CategoryId }, categoryCreate);
         }
 
@@ -146,6 +176,8 @@ namespace MinhaPrimeiraApi.Controllers
             var categoryATT = _uof.CategoryRepository.UpdateCategory(category);
             _uof.Commit();
             
+            InvalidateCacheAfterChange(id);
+            
             return Ok(categoryATT);
         }
 
@@ -159,10 +191,22 @@ namespace MinhaPrimeiraApi.Controllers
                 return NotFound("Category not found.");
             }
 
+            var CacheCategoryId = GetCategoryCacheKey(id);
+
             var categoryDelete = _uof.CategoryRepository.DeleteCategory(id);
             _uof.Commit();
+
+            InvalidateCacheAfterChange(id);
             
             return Ok(categoryDelete);
+        }
+        
+        private string GetCategoryCacheKey(int id) => $"Category_{id}";
+        
+        private void InvalidateCacheAfterChange(int id)
+        {
+            _cache.Remove(CacheCategoryAll);
+            _cache.Remove(GetCategoryCacheKey(id));
         }
     }
 }
