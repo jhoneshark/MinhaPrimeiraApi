@@ -6,6 +6,7 @@ using MinhaPrimeiraApi.Extensions;
 using MinhaPrimeiraApi.Filters;
 using MinhaPrimeiraApi.Logging;
 using MinhaPrimeiraApi.Services;
+using MinhaPrimeiraApi.Services.Schedules;
 
 DotNetEnv.Env.Load();
 
@@ -52,6 +53,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
     app.ConfigureExeptionHandler();
 }
+
+app.UseHangfireDashboardCustom();
+
+app.RegisterHangfireJobs();
 
 app.UseHttpsRedirection();
 

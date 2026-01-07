@@ -5,6 +5,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Threading.RateLimiting;
 using Asp.Versioning;
+using Hangfire;
+using Hangfire.MySql;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.RateLimiting;
@@ -23,12 +25,57 @@ public static class ServiceCollectionExtensions
         AddAuthenticationServices(services, configuration);
         AddAuthenticationServices(services);
         AddRedisServices(services, configuration);
+        AddHangfireServices(services, configuration);
         AddSwaggerServices(services);
         AddRateLimiter(services);
         AddPolicyCors(services);
         AddPolicysAuthorization(services);
         AddApiVersioningServices(services);
         return services;
+    }
+
+    private static void AddHangfireServices(IServiceCollection services, IConfiguration configuration)
+    {
+        // var dbHost = Environment.GetEnvironmentVariable("DB_HOST");
+        // var dbPort = Environment.GetEnvironmentVariable("DB_PORT");
+        // var dbUser = Environment.GetEnvironmentVariable("DB_USERNAME");
+        // var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
+        // var dbName = Environment.GetEnvironmentVariable("DB_DATABASE");
+        //
+        // string connectionString =
+        //     $"Server={dbHost};Port={dbPort};User Id={dbUser};Password=\"{dbPassword}\";Database={dbName};Allow User Variables=true;";
+        
+        var connectionString = configuration.GetConnectionString("DefaultConnection");
+
+        GlobalJobFilters.Filters.Add(new AutomaticRetryAttribute { Attempts = 1 });
+
+        services.AddHangfire(configuration => configuration
+            .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+            .UseSimpleAssemblyNameTypeSerializer()
+            .UseRecommendedSerializerSettings()
+            .UseStorage(
+                new MySqlStorage(
+                    connectionString,
+                    new MySqlStorageOptions
+                    {
+                        QueuePollInterval = TimeSpan.FromSeconds(10),
+                        JobExpirationCheckInterval = TimeSpan.FromHours(1),
+                        CountersAggregateInterval = TimeSpan.FromMinutes(5),
+                        PrepareSchemaIfNecessary = true,
+                        DashboardJobListLimit = 25000,
+                        TransactionTimeout = TimeSpan.FromMinutes(1),
+                        TablesPrefix = "Hangfire",
+                    }
+                )
+            ));
+
+        services.AddHangfireServer(options =>
+        {
+            options.WorkerCount = Environment.ProcessorCount * 5;
+            options.Queues = new[] { "default", "critical" };
+            options.ServerTimeout = TimeSpan.FromMinutes(5);
+            options.ShutdownTimeout = TimeSpan.FromMinutes(15);
+        });
     }
 
     private static void AddRedisServices(IServiceCollection services, IConfiguration configuration)
@@ -50,6 +97,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IRedisCacheService, RedisCacheService>();
+        services.AddScoped<TesteService>();
     }
     
     private static void AddApiVersioningServices(IServiceCollection services)
