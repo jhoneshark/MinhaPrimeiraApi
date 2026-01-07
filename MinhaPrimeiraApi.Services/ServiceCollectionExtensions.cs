@@ -22,6 +22,7 @@ public static class ServiceCollectionExtensions
         AddApplicationServices(services);
         AddAuthenticationServices(services, configuration);
         AddAuthenticationServices(services);
+        AddRedisServices(services, configuration);
         AddSwaggerServices(services);
         AddRateLimiter(services);
         AddPolicyCors(services);
@@ -30,12 +31,25 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
+    private static void AddRedisServices(IServiceCollection services, IConfiguration configuration)
+    {
+        var redisConnectionString = Environment.GetEnvironmentVariable("REDIS_CONNECTION");
+        // var redisConnectionString = configuration.GetConnectionString("RedisCloud");
+
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = redisConnectionString;
+            options.InstanceName = "MinhaPrimeiraApi_";
+        });
+    }
+
     private static void AddApplicationServices(IServiceCollection services)
     {
         services.AddScoped<ICategoryRepository, CategoriesRepository>();
         services.AddScoped<IProductsRepository, ProductsRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IRedisCacheService, RedisCacheService>();
     }
     
     private static void AddApiVersioningServices(IServiceCollection services)

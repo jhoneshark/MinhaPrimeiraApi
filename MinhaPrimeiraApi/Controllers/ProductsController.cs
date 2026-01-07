@@ -14,11 +14,14 @@ namespace MinhaPrimeiraApi.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly IProductsRepository _productsRepository;
+        private readonly IRedisCacheService _cacheService;
         private readonly IMapper _mapper;
+        private const string ProductsAll  = "products_all";
 
-        public ProductsController(IProductsRepository productsRepository, IMapper mapper)
+        public ProductsController(IProductsRepository productsRepository, IMapper mapper, IRedisCacheService cacheService)
         {
             _productsRepository = productsRepository;
+            _cacheService = cacheService;
             _mapper = mapper;
         }
 
@@ -94,12 +97,19 @@ namespace MinhaPrimeiraApi.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<ProductDTO>> Get()
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> Get()
         {
             // como o GetProducts é IQueryable posso fazer consultas como exemplo abaixo
             // var products = _productsRepository.GetProducts().OrderBy(p => p.Name).ToList();
             // var products = _productsRepository.GetProducts().Where(p => p.Price > 15).ToList();
             // var products = _productsRepository.GetProducts().Select(p => p.Name).ToList();
+            
+            var productsCache = await _cacheService.GetAsync<IEnumerable<ProductDTO>>(ProductsAll);
+
+            if (productsCache is not null)
+            {
+                return Ok(productsCache);
+            }
             
             var products = _productsRepository.GetProducts().ToList();
             
@@ -107,6 +117,8 @@ namespace MinhaPrimeiraApi.Controllers
                 return NotFound();
             
             var productDTO = _mapper.Map<IEnumerable<ProductDTO>>(products);
+            
+            await _cacheService.SetCacheAsync(ProductsAll, productDTO);
             
             return Ok(productDTO);
         }
@@ -127,7 +139,7 @@ namespace MinhaPrimeiraApi.Controllers
         }
 
         [HttpPost]
-        [Authorize(Policy = "RootOnly")]
+        //[Authorize(Policy = "RootOnly")]
         public ActionResult<ProductDTO> Post(ProductDTO productDto)
         {
             if (productDto is null)
