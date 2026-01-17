@@ -5,6 +5,7 @@ using MinhaPrimeiraApi.Domain.DTOs.Mappings;
 using MinhaPrimeiraApi.Extensions;
 using MinhaPrimeiraApi.Filters;
 using MinhaPrimeiraApi.Logging;
+using MinhaPrimeiraApi.Middlewares;
 using MinhaPrimeiraApi.Services;
 using MinhaPrimeiraApi.Services.Schedules;
 
@@ -60,8 +61,9 @@ app.RegisterHangfireJobs();
 
 app.UseHttpsRedirection();
 
-app.UseAuthentication();
+app.UseMiddleware<ApiLoggingMiddleware>();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseRateLimiter();
