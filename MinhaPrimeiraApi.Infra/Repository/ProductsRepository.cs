@@ -3,14 +3,15 @@ using MinhaPrimeiraApi.Domain.Interface;
 using MinhaPrimeiraApi.Infra.Context;
 using MinhaPrimeiraApi.Domain.Models;
 using MinhaPrimeiraApi.Domain.Models.Pagination;
+using MinhaPrimeiraApi.Infra.Repository;
 
 namespace MinhaPrimeiraApi.Domain.Repository;
 
-public class ProductsRepository : IProductsRepository
+public class ProductsRepository : GenericRepository<Product>, IProductsRepository
 {
     private readonly AppDbContext _context;
 
-    public ProductsRepository(AppDbContext context)
+    public ProductsRepository(AppDbContext context) : base(context)
     {
         _context = context;
     }
@@ -42,19 +43,19 @@ public class ProductsRepository : IProductsRepository
             if (productsParameters.PriceCriteria.Equals("maior", StringComparison.InvariantCultureIgnoreCase))
             {
                 productQuery = productQuery.Where(p => p.Price > productsParameters.Price.Value);
-            } 
+            }
             else if (productsParameters.PriceCriteria.Equals("menor", StringComparison.InvariantCultureIgnoreCase))
             {
                 productQuery = productQuery.Where(p => p.Price < productsParameters.Price.Value);
-            } 
+            }
             else if (productsParameters.PriceCriteria.Equals("igual", StringComparison.InvariantCultureIgnoreCase))
             {
                 productQuery = productQuery.Where(p => p.Price == productsParameters.Price.Value);
             }
         }
-        
+
         var productsFiltered = await PagedList<Product>.ToPagedList(productQuery, productsParameters.PageNumber, productsParameters.PageSize);
-        
+
         return productsFiltered;
     }
 
@@ -70,28 +71,28 @@ public class ProductsRepository : IProductsRepository
 
     public Product GetProduct(int id)
     {
-        return _context.Products.FirstOrDefault(p => p.ProductId == id);
+        return _context.Products.FirstOrDefault(p => p.ProductId == id)!;
     }
 
     public Product CreateProduct(Product product)
     {
         if (product is null)
             throw new ArgumentNullException(nameof(product));
-        
+
         _context.Products.Add(product);
         _context.SaveChanges();
-        
+
         return product;
     }
 
     public Product UpdateProduct(Product product)
     {
-        if  (product is null)
+        if (product is null)
             throw new ArgumentNullException(nameof(product));
 
         _context.Entry(product).State = EntityState.Modified;
         _context.SaveChanges();
-        
+
         return product;
     }
 
@@ -101,10 +102,10 @@ public class ProductsRepository : IProductsRepository
 
         if (product is null)
             throw new ArgumentNullException(nameof(product));
-        
+
         _context.Products.Remove(product);
         _context.SaveChanges();
-        
+
         return product;
     }
 }
