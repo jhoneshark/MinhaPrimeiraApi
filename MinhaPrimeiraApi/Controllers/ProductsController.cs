@@ -55,6 +55,7 @@ namespace MinhaPrimeiraApi.Controllers
         {
             var products = await _productsRepository.GetProductsFilterPrice(productsParametersarameters);
 
+            
             return ProductsFilteredPrice(products);
         }
 
