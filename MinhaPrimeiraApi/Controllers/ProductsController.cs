@@ -140,7 +140,7 @@ namespace MinhaPrimeiraApi.Controllers
 
         [HttpPost]
         //[Authorize(Policy = "RootOnly")]
-        public ActionResult<ProductDTO> Post(ProductDTO productDto)
+        public async Task<ActionResult<ProductDTO>> Post(ProductDTO productDto)
         {
             if (productDto is null)
             {
@@ -149,7 +149,7 @@ namespace MinhaPrimeiraApi.Controllers
             
             var product = _mapper.Map<Product>(productDto);
 
-            var productCreated = _productsRepository.CreateProduct(product);
+            var productCreated = await _productsRepository.CreateProduct(product);
             
             var newProductDTO = _mapper.Map<ProductDTO>(productCreated);
             
@@ -158,7 +158,7 @@ namespace MinhaPrimeiraApi.Controllers
         }
 
         [HttpPut("{id:int:min(1)}")]
-        public ActionResult<ProductDTO> Put(int id, ProductDTO productDto)
+        public async Task<ActionResult<ProductDTO>> Put(int id, ProductDTO productDto)
         {
             if (id != productDto.ProductId)
             {
@@ -166,7 +166,7 @@ namespace MinhaPrimeiraApi.Controllers
             }
             var product = _mapper.Map<Product>(productDto);
 
-            var productATT = _productsRepository.UpdateProduct(product);
+            var productATT = await _productsRepository.UpdateProduct(product);
             
             var newProductDTO = _mapper.Map<ProductDTO>(productATT);
             

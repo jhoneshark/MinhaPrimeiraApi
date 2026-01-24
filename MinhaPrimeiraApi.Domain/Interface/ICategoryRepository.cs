@@ -10,9 +10,9 @@ public interface ICategoryRepository
     Task<IPagedList<Category>> GetCategoriesPagination(CategoriesParameters categoriesParameters);
     Task<Models.Pagination.PagedList<Category>> GetCategoriesFilterName(CategoriesFilterName categoriesParameters);
     Task<IEnumerable<Category>> GetCategories();
-    Category GetCategory(int id);
-    Category CreateCategory(Category category);
-    Category UpdateCategory(Category category);
-    Category DeleteCategory(int id);
-    IEnumerable<Category> GetCategoriesWithProducts();
+    Task<Category> GetCategory(int id);
+    Task<Category> CreateCategory(Category category);
+    Task<Category> UpdateCategory(Category category);
+    Task<Category> DeleteCategory(int id);
+    Task<IEnumerable<Category>> GetCategoriesWithProducts();
 }

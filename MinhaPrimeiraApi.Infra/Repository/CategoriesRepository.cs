@@ -52,7 +52,7 @@ public class CategoriesRepository : ICategoryRepository
         return await _context.Categories.AsNoTracking().ToListAsync();
     }
 
-    public Category GetCategory(int id)
+    public async Task<Category> GetCategory(int id)
     {
         // Adicionar um delay de 3 segundos para teste
         // Ele é sincrono e bloqueia a thread
@@ -63,29 +63,29 @@ public class CategoriesRepository : ICategoryRepository
         return _context.Categories.FirstOrDefault(c => c.CategoryId == id);
     }
 
-    public Category CreateCategory(Category category)
+    public async Task<Category> CreateCategory(Category category)
     {
         if (category is null)
             throw new ArgumentNullException(nameof(category));
         
         _context.Categories.Add(category);
-        _context.SaveChanges();
+        _context.SaveChangesAsync();
         
         return category;
     }
 
-    public Category UpdateCategory(Category category)
+    public async Task<Category> UpdateCategory(Category category)
     {
         if (category is null)
             throw new ArgumentNullException(nameof(category));
 
         _context.Entry(category).State = EntityState.Modified;
-        _context.SaveChanges();
+        _context.SaveChangesAsync();
         
         return category;
     }
 
-    public Category DeleteCategory(int id)
+    public async Task<Category> DeleteCategory(int id)
     {
         var category = _context.Categories.Find(id);
         
@@ -93,13 +93,13 @@ public class CategoriesRepository : ICategoryRepository
             throw new ArgumentNullException(nameof(category));
 
         _context.Categories.Remove(category);
-        _context.SaveChanges();
+        _context.SaveChangesAsync();
         
         return category;
         
     }
 
-    public IEnumerable<Category> GetCategoriesWithProducts()
+    public async Task<IEnumerable<Category>> GetCategoriesWithProducts()
     {
         return _context.Categories.Include(p => p.Products).ToList();
     }

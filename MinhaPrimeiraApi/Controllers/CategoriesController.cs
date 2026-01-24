@@ -150,14 +150,14 @@ namespace MinhaPrimeiraApi.Controllers
 
         [HttpPost]
         [Authorize(Policy = "RootOnly")]
-        public ActionResult post(Category category)
+        public async Task<ActionResult> post(Category category)
         {
             if (category is null)
             {
                 return BadRequest("Category invalid");
             }
 
-            var categoryCreate = _uof.CategoryRepository.CreateCategory(category);
+            var categoryCreate = await _uof.CategoryRepository.CreateCategory(category);
             _uof.Commit();
             
             _cache.Remove(CacheCategoryAll);
@@ -166,7 +166,7 @@ namespace MinhaPrimeiraApi.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public ActionResult Put(int id, Category category)
+        public async Task<ActionResult> Put(int id, Category category)
         {
             if (id != category.CategoryId)
             {
@@ -183,7 +183,7 @@ namespace MinhaPrimeiraApi.Controllers
 
         [HttpDelete("{id:int}")]
         [Authorize(Policy = "ExclusivePolicyOnly")]
-        public ActionResult delete(int id)
+        public async Task<ActionResult> delete(int id)
         {
             var category = _uof.CategoryRepository.GetCategory(id);
             if (category is null)
@@ -193,7 +193,7 @@ namespace MinhaPrimeiraApi.Controllers
 
             var CacheCategoryId = GetCategoryCacheKey(id);
 
-            var categoryDelete = _uof.CategoryRepository.DeleteCategory(id);
+            var categoryDelete =  _uof.CategoryRepository.DeleteCategory(id);
             _uof.Commit();
 
             InvalidateCacheAfterChange(id);
