@@ -3,37 +3,25 @@ using MinhaPrimeiraApi.Domain.Interface;
 
 namespace MinhaPrimeiraApi.Domain.Repository;
 
-public class UnitOfWork: IUnitOfWork
+public class UnitOfWork : IUnitOfWork
 {
-    private IProductsRepository _productsRepository;
-    private ICategoryRepository _categoryRepository;
-    public AppDbContext _context;
+    private readonly AppDbContext _context;
+    // Repositórios injetados
+    public IProductsRepository ProductsRepository { get; }
+    public ICategoryRepository CategoryRepository { get; }
 
-    public UnitOfWork(AppDbContext context)
+    public UnitOfWork(AppDbContext context, 
+        IProductsRepository productsRepository, 
+        ICategoryRepository categoryRepository)
     {
         _context = context;
-    }
-
-    public IProductsRepository ProductsRepository
-    {
-        get
-        {
-            return _productsRepository ??  new ProductsRepository(_context);
-        }
-        
-    }
-
-    public ICategoryRepository CategoryRepository
-    {
-        get
-        {
-            return _categoryRepository ?? new CategoriesRepository(_context);
-        }
+        ProductsRepository = productsRepository;
+        CategoryRepository = categoryRepository;
     }
 
     public async Task Commit()
     {
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
     }
 
     public void Dispose()
