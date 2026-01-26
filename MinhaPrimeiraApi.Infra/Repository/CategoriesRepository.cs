@@ -69,7 +69,6 @@ public class CategoriesRepository : ICategoryRepository
             throw new ArgumentNullException(nameof(category));
         
         _context.Categories.Add(category);
-        _context.SaveChangesAsync();
         
         return category;
     }

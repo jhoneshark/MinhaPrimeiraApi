@@ -158,7 +158,7 @@ namespace MinhaPrimeiraApi.Controllers
             }
 
             var categoryCreate = await _uof.CategoryRepository.CreateCategory(category);
-            _uof.Commit();
+            await _uof.Commit();
             
             _cache.Remove(CacheCategoryAll);
             
