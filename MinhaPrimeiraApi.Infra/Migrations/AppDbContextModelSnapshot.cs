@@ -70,6 +70,65 @@ namespace MinhaPrimeiraApi.Infra.Migrations
                     b.ToTable("ApiResponseLog");
                 });
 
+            modelBuilder.Entity("MinhaPrimeiraApi.Domain.Models.Audit", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AuditableId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("AuditableType")
+                        .IsRequired()
+                        .HasMaxLength(191)
+                        .HasColumnType("varchar(191)");
+
+                    b.Property<int>("ChangedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Event")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<string>("Ip")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("NewValues")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("OldValues")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("varchar(300)");
+
+                    b.Property<string>("UserAgent")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChangedBy");
+
+                    b.ToTable("Audit");
+                });
+
             modelBuilder.Entity("MinhaPrimeiraApi.Domain.Models.Category", b =>
                 {
                     b.Property<int>("CategoryId")
@@ -210,6 +269,17 @@ namespace MinhaPrimeiraApi.Infra.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("MinhaPrimeiraApi.Domain.Models.Audit", b =>
+                {
+                    b.HasOne("MinhaPrimeiraApi.Domain.Models.Users", "User")
+                        .WithMany("Audits")
+                        .HasForeignKey("ChangedBy")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("MinhaPrimeiraApi.Domain.Models.Product", b =>
                 {
                     b.HasOne("MinhaPrimeiraApi.Domain.Models.Category", "Category")
@@ -240,6 +310,11 @@ namespace MinhaPrimeiraApi.Infra.Migrations
             modelBuilder.Entity("MinhaPrimeiraApi.Domain.Models.Roles", b =>
                 {
                     b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("MinhaPrimeiraApi.Domain.Models.Users", b =>
+                {
+                    b.Navigation("Audits");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,11 +1,12 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using MinhaPrimeiraApi.Domain.Interface;
 using MinhaPrimeiraApi.Domain.Validations;
 
 namespace MinhaPrimeiraApi.Domain.Models;
 
-public class Product
+public class Product : IAudiTable
 {
     [Key]
     public int ProductId { get; set; }

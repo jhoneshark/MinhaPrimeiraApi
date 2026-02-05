@@ -89,10 +89,14 @@ public class ProductsRepository : IProductsRepository
         if  (product is null)
             throw new ArgumentNullException(nameof(product));
 
-        _context.Entry(product).State = EntityState.Modified;
-        _context.SaveChangesAsync();
+        var productDb = await _context.Products.FindAsync(product.ProductId);
+
+        if (productDb is null) return null;
         
-        return product;
+        _context.Entry(productDb).CurrentValues.SetValues(product);
+        await _context.SaveChangesAsync();
+        
+        return productDb;
     }
 
     public async Task<Product> DeleteProduct(int id)

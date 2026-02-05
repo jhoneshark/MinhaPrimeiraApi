@@ -4,6 +4,7 @@ using MinhaPrimeiraApi.Infra.Context;
 using MinhaPrimeiraApi.Domain.DTOs.Mappings;
 using MinhaPrimeiraApi.Extensions;
 using MinhaPrimeiraApi.Filters;
+using MinhaPrimeiraApi.Infra.Interceptors;
 using MinhaPrimeiraApi.Logging;
 using MinhaPrimeiraApi.Middlewares;
 using MinhaPrimeiraApi.Services;
@@ -26,11 +27,17 @@ builder.Services.AddControllers(options =>
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHttpContextAccessor();
 
 // string mySqlConnection = builder.Configuration.GetConnectionString("DefaultConnection");
 string mySqlConnection = builder.Configuration.GetValue<string>("DEFAULT_CONNECTION");
 
-builder.Services.AddDbContext<AppDbContext>(options => options.UseMySql(mySqlConnection, ServerVersion.AutoDetect(mySqlConnection)));
+builder.Services.AddDbContext<AppDbContext>((sp, options) =>
+{
+    var interceptor = sp.GetRequiredService<AuditInterceptor>();
+    options.UseMySql(mySqlConnection, ServerVersion.AutoDetect(mySqlConnection))
+        .AddInterceptors(interceptor);
+});
 
 builder.Services.AddCatalogServices(builder.Configuration);
 

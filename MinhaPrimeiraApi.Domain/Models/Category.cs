@@ -1,9 +1,10 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
+using MinhaPrimeiraApi.Domain.Interface;
 
 namespace MinhaPrimeiraApi.Domain.Models;
 
-public class Category
+public class Category : IAudiTable
 {
     public Category()
     {

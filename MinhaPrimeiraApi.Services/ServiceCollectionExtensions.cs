@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.OpenApi.Models;
 using MinhaPrimeiraApi.Domain.Interface;
 using MinhaPrimeiraApi.Domain.Repository;
+using MinhaPrimeiraApi.Infra.Interceptors;
 using MinhaPrimeiraApi.Services.Services;
 
 namespace MinhaPrimeiraApi.Services;
@@ -98,6 +99,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IRedisCacheService, RedisCacheService>();
         services.AddScoped<IApiLogService, ApiLogService>();
+        services.AddScoped<AuditInterceptor>();
         services.AddScoped<TesteService>();
     }
     

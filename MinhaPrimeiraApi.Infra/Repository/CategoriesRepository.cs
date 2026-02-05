@@ -78,10 +78,15 @@ public class CategoriesRepository : ICategoryRepository
         if (category is null)
             throw new ArgumentNullException(nameof(category));
 
-        _context.Entry(category).State = EntityState.Modified;
-        _context.SaveChangesAsync();
+        var categoryDb = await _context.Categories.FindAsync(category.CategoryId);
         
-        return category;
+        if (categoryDb is null) return null;
+        
+        _context.Entry(categoryDb).CurrentValues.SetValues(category);
+        
+        await _context.SaveChangesAsync();
+        
+        return categoryDb;
     }
 
     public async Task<Category> DeleteCategory(int id)

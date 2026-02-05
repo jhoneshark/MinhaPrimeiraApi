@@ -112,7 +112,7 @@ namespace MinhaPrimeiraApi.Controllers
             return Ok(categories);
         }
 
-        [HttpGet("{id:int:min(1)}", Name = "GetCategoryById")]
+        [HttpGet("{id:int}", Name = "GetCategoryById")]
         public async Task<ActionResult<Category>> get(int id)
         {
             var CacheCategoryId = GetCategoryCacheKey(id);
@@ -149,7 +149,7 @@ namespace MinhaPrimeiraApi.Controllers
         }
 
         [HttpPost]
-        [Authorize(Policy = "RootOnly")]
+        // [Authorize(Policy = "ExclusivePolicyOnly")]
         public async Task<ActionResult> post(Category category)
         {
             if (category is null)
@@ -173,7 +173,7 @@ namespace MinhaPrimeiraApi.Controllers
                 return BadRequest("Dados invalidos");
             }
 
-            var categoryATT = _uof.CategoryRepository.UpdateCategory(category);
+            var categoryATT = await _uof.CategoryRepository.UpdateCategory(category);
             _uof.Commit();
             
             InvalidateCacheAfterChange(id);

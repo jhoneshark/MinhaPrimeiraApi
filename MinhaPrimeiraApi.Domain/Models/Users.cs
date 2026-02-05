@@ -1,9 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using MinhaPrimeiraApi.Domain.Interface;
 
 namespace MinhaPrimeiraApi.Domain.Models;
 
-public class Users
+public class Users : IAudiTable
 {
     [Key]
     public int Id { get; set; }
@@ -37,4 +38,6 @@ public class Users
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    
+    public ICollection<Audit> Audits { get; set; }
 }

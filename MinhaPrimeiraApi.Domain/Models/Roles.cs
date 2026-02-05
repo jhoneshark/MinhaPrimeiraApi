@@ -1,8 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using MinhaPrimeiraApi.Domain.Interface;
 
 namespace MinhaPrimeiraApi.Domain.Models;
 
-public class Roles
+public class Roles : IAudiTable
 {
     [Key]
     public int Id { get; set; }
